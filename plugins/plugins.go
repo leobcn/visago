@@ -20,6 +20,7 @@ var (
 type Plugin interface {
 	Perform(PluginConfig) (string, PluginResult, error)
 	Setup() error
+	Reset()
 }
 
 // PluginResult is an interface on returned objects

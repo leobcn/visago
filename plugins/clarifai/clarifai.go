@@ -67,6 +67,11 @@ func (p *Plugin) Tags(requestID string) (tags map[string][]string, err error) {
 	return
 }
 
+// Reset clears the cache of existing responses.
+func (p *Plugin) Reset() {
+	p.tagResps = make(map[string]*clarifai.TagResp)
+}
+
 // Setup sets up the plugin for use. This should only
 // be called once per plugin.
 func (p *Plugin) Setup() error {
