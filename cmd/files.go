@@ -119,12 +119,12 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 				fmt.Printf("[Warn] Failed running perform on %q plugin: %s\n", name, err)
 			}
 
-			tags, err := output.Tags()
+			tagMap, err := output.Tags()
 			if err != nil {
 				return err
 			}
 
-			displayTags(name, tags)
+			displayTags(name, tagMap)
 		}
 
 		return nil
@@ -137,11 +137,11 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func displayTags(name string, tags map[string][]string) {
-	if len(tags) > 0 {
-		for asset, tagList := range tags {
+func displayTags(name string, tagMap map[string][]string) {
+	if len(tagMap) > 0 {
+		for asset, tags := range tagMap {
 			fmt.Printf("%s - %s\n", name, asset)
-			fmt.Printf("%v\n", tagList)
+			fmt.Printf("%v\n", tags)
 		}
 	}
 }
