@@ -70,7 +70,7 @@ func FilesCommand(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	files := strings.Join(args, " ")
+	items := strings.Join(args, " ")
 
 	st, err := os.Stdin.Stat()
 	if err != nil {
@@ -85,11 +85,34 @@ func FilesCommand(cmd *cobra.Command, args []string) error {
 				return fmt.Errorf("Failed to read from Stdin: %s", err)
 			}
 
-			files = strings.TrimSpace(fmt.Sprintf("%s %s", files, bytes))
+			items = strings.TrimSpace(fmt.Sprintf("%s %s", items, bytes))
 		}
 	}
 
-	if files != "" {
+	if items != "" {
+		itemList := strings.Split(items, " ")
+
+		pluginConfig := plugins.PluginConfig{
+			// For the very short term we
+			// will only pass URLs.
+			URLs: itemList,
+		}
+
+		for _, name := range plugins.PluginNames(false) {
+			err := plugins.Plugins[name].Setup()
+			if err != nil {
+				fmt.Printf("[Warn] Failed to setup %q plugin: %s\n", name, err)
+				continue
+			}
+
+			output, err := plugins.Plugins[name].Perform(pluginConfig)
+			if err != nil {
+				fmt.Printf("[Warn] Failed running perform on %q plugin: %s\n", name, err)
+			}
+
+			fmt.Println(output)
+		}
+
 	} else {
 		// Don't return an error, help screen is more appropriate.
 		help := cmd.HelpFunc()

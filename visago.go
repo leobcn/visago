@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	_ "github.com/zquestz/visago/plugins/clarifai"
+
 	"github.com/zquestz/visago/cmd"
 )
 

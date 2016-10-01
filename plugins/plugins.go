@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 )
@@ -14,9 +15,18 @@ var (
 )
 
 // Plugin interface provides a way to query
-// different Visual AI backends
+// different Visual AI backends. Plugins should
+// initialize themselves with a PluginConfig.
 type Plugin interface {
-	Perform(string) string
+	Perform(PluginConfig) (string, error)
+	Setup() error
+}
+
+// PluginConfig is used to pass configuration
+// data to plugins when they load.
+type PluginConfig struct {
+	URLs  []string   `json:"-"`
+	Files []*os.File `json:"-"`
 }
 
 // Plugins tracks loaded plugins.
