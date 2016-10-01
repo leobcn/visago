@@ -76,7 +76,7 @@ func DisplayPlugins(verbose bool) string {
 func PluginNames(verbose bool) []string {
 	names := []string{}
 
-	for key, _ := range Plugins {
+	for key := range Plugins {
 		if enableWhitelist {
 			_, ok := whitelist[key]
 			if !ok {

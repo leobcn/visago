@@ -28,8 +28,7 @@ func (p *Plugin) Perform(c plugins.PluginConfig) (string, error) {
 	return "Clarifai performed", nil
 }
 
-// Valid makes sure all required configuration
-// data is available to setup Clarifai.
+// Setup sets up the plugin for use.
 func (p *Plugin) Setup() error {
 	id := os.Getenv("CLARIFAI_CLIENT_ID")
 	secret := os.Getenv("CLARIFAI_CLIENT_SECRET")
