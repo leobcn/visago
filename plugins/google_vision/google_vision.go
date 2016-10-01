@@ -27,7 +27,7 @@ type Plugin struct {
 
 // Perform gathers metadata from the Google Vision API. Currently
 // we only support URLs but files will be added.
-func (p *Plugin) Perform(c plugins.PluginConfig) (string, plugins.PluginResult, error) {
+func (p *Plugin) Perform(c *plugins.PluginConfig) (string, plugins.PluginResult, error) {
 	if p.configured == false {
 		return "", nil, fmt.Errorf("not configured")
 	}

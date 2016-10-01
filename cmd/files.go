@@ -102,30 +102,14 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("failed to find any valid files or URLs")
 		}
 
-		pluginConfig := plugins.PluginConfig{
+		pluginConfig := &plugins.PluginConfig{
 			URLs:  urls,
 			Files: files,
 		}
 
-		for _, name := range plugins.PluginNames() {
-			err := plugins.Plugins[name].Setup()
-			if err != nil {
-				fmt.Printf("[Warn] Failed to setup %q plugin: %s\n", name, err)
-				continue
-			}
-
-			requestID, pluginResponse, err := plugins.Plugins[name].Perform(pluginConfig)
-			if err != nil {
-				fmt.Printf("[Warn] Failed running perform on %q plugin: %s\n", name, err)
-				continue
-			}
-
-			tagMap, err := pluginResponse.Tags(requestID)
-			if err != nil {
-				return err
-			}
-
-			displayTags(name, tagMap)
+		err := runPlugins(pluginConfig)
+		if err != nil {
+			return err
 		}
 
 		return nil
@@ -134,6 +118,31 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 	// Don't return an error, help screen is more appropriate.
 	help := cmd.HelpFunc()
 	help(cmd, args)
+
+	return nil
+}
+
+func runPlugins(pluginConfig *plugins.PluginConfig) error {
+	for _, name := range plugins.PluginNames() {
+		err := plugins.Plugins[name].Setup()
+		if err != nil {
+			fmt.Printf("[Warn] Failed to setup %q plugin: %s\n", name, err)
+			continue
+		}
+
+		requestID, pluginResponse, err := plugins.Plugins[name].Perform(pluginConfig)
+		if err != nil {
+			fmt.Printf("[Warn] Failed running perform on %q plugin: %s\n", name, err)
+			continue
+		}
+
+		tagMap, err := pluginResponse.Tags(requestID)
+		if err != nil {
+			return err
+		}
+
+		displayTags(name, tagMap)
+	}
 
 	return nil
 }

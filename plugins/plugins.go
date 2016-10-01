@@ -18,7 +18,7 @@ var (
 // different Visual AI backends. Plugins should
 // initialize themselves with a PluginConfig.
 type Plugin interface {
-	Perform(PluginConfig) (string, PluginResult, error)
+	Perform(*PluginConfig) (string, PluginResult, error)
 	Setup() error
 	Reset()
 	RequestIDs() ([]string, error)
