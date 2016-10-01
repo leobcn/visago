@@ -22,7 +22,7 @@ var config Config
 
 // FilesCmd is the main command for Cobra.
 var FilesCmd = &cobra.Command{
-	Use:   "visago <files>",
+	Use:   "visago <files/urls>",
 	Short: "Visual AI Aggregator",
 	Long:  `Visual AI Aggregator`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -114,12 +114,12 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 				continue
 			}
 
-			output, err := plugins.Plugins[name].Perform(pluginConfig)
+			requestID, output, err := plugins.Plugins[name].Perform(pluginConfig)
 			if err != nil {
 				fmt.Printf("[Warn] Failed running perform on %q plugin: %s\n", name, err)
 			}
 
-			tagMap, err := output.Tags()
+			tagMap, err := output.Tags(requestID)
 			if err != nil {
 				return err
 			}
