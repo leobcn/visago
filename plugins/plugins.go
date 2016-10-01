@@ -21,10 +21,13 @@ type Plugin interface {
 	Perform(PluginConfig) (string, PluginResult, error)
 	Setup() error
 	Reset()
+	RequestIDs() ([]string, error)
 }
 
 // PluginResult is an interface on returned objects
-// from the API.
+// from the API. All result methods will require
+// a string containing the requestID returned from
+// Perform().
 type PluginResult interface {
 	Tags(string) (map[string][]string, error)
 }

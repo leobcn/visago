@@ -23,7 +23,8 @@ type Plugin struct {
 }
 
 // Perform gathers metadata from Clarifai, for the first pass
-// it only supports urls.
+// it only supports urls. When PR's in the clarifai repo add
+// file support, it will be added here.
 func (p *Plugin) Perform(c plugins.PluginConfig) (string, plugins.PluginResult, error) {
 	if p.configured == false {
 		return "", nil, fmt.Errorf("not configured")
@@ -70,6 +71,21 @@ func (p *Plugin) Tags(requestID string) (tags map[string][]string, err error) {
 // Reset clears the cache of existing responses.
 func (p *Plugin) Reset() {
 	p.tagResps = make(map[string]*clarifai.TagResp)
+}
+
+// RequestIDs returns a list of all cached response
+// requestIDs.
+func (p *Plugin) RequestIDs() ([]string, error) {
+	if p.configured == false {
+		return nil, fmt.Errorf("not configured")
+	}
+
+	keys := []string{}
+	for k := range p.tagResps {
+		keys = append(keys, k)
+	}
+
+	return keys, nil
 }
 
 // Setup sets up the plugin for use. This should only
