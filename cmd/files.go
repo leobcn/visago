@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/spf13/cobra"
 	"github.com/zquestz/visago/plugins"
 )
@@ -66,7 +67,7 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 	plugins.SetWhitelist(config.Whitelist)
 
 	if config.ListPlugins {
-		fmt.Printf(plugins.DisplayPlugins(config.Verbose))
+		fmt.Printf(plugins.DisplayPlugins())
 		return nil
 	}
 
@@ -92,13 +93,21 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 	if items != "" {
 		itemList := strings.Split(items, " ")
 
-		pluginConfig := plugins.PluginConfig{
-			// For the very short term we
-			// will only pass URLs.
-			URLs: itemList,
+		urls, files, errs := sortItems(itemList)
+		for _, err := range errs {
+			fmt.Printf("[Error] Failed to sort input: %v\n", err)
 		}
 
-		for _, name := range plugins.PluginNames(false) {
+		if len(urls) == 0 && len(files) == 0 {
+			return fmt.Errorf("Didn't find any valid files or URLs")
+		}
+
+		pluginConfig := plugins.PluginConfig{
+			URLs:  urls,
+			Files: files,
+		}
+
+		for _, name := range plugins.PluginNames() {
 			err := plugins.Plugins[name].Setup()
 			if err != nil {
 				fmt.Printf("[Warn] Failed to setup %q plugin: %s\n", name, err)
@@ -110,7 +119,9 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 				fmt.Printf("[Warn] Failed running perform on %q plugin: %s\n", name, err)
 			}
 
-			fmt.Println(output)
+			if output != "" {
+				fmt.Println(output)
+			}
 		}
 
 	} else {
@@ -120,4 +131,30 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+func sortItems(items []string) (urls []string, files []*os.File, errs []error) {
+	for _, item := range items {
+		_, err := os.Stat(item)
+		if err == nil {
+			file, err := os.Open(item)
+			if err == nil {
+				files = append(files, file)
+			} else {
+				fmt.Println(err)
+			}
+
+			continue
+		}
+
+		valid := govalidator.IsURL(item)
+		if valid {
+			urls = append(urls, item)
+			continue
+		}
+
+		errs = append(errs, fmt.Errorf("%q is not a file or url", item))
+	}
+
+	return
 }

@@ -65,15 +65,15 @@ func SetWhitelist(w []string) {
 }
 
 // DisplayPlugins displays all the loaded plugins.
-func DisplayPlugins(verbose bool) string {
-	names := PluginNames(verbose)
+func DisplayPlugins() string {
+	names := PluginNames()
 
 	return fmt.Sprintf("%s\n", strings.Join(names, "\n"))
 }
 
 // PluginNames returns a sorted slice of plugin names
 // applying both the whitelist and then the blacklist.
-func PluginNames(verbose bool) []string {
+func PluginNames() []string {
 	names := []string{}
 
 	for key := range Plugins {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Clarifai/clarifai-go"
 	"github.com/zquestz/visago/plugins"
 )
 
@@ -19,10 +20,33 @@ type Plugin struct {
 	secret     string
 }
 
-// Perform gathers metadata from Clarifai.
+// Perform gathers metadata from Clarifai, for the first pass
+// it only supports urls.
 func (p *Plugin) Perform(c plugins.PluginConfig) (string, error) {
 	if p.configured == false {
 		return "", fmt.Errorf("not configured")
+	}
+
+	if len(c.URLs) == 0 {
+		return "", fmt.Errorf("must supply urls")
+	}
+
+	client := clarifai.NewClient(p.clientID, p.secret)
+	info, err := client.Info()
+	if err != nil {
+		return "", err
+	} else {
+		fmt.Printf("%+v\n", info)
+	}
+
+	tagData, err := client.Tag(clarifai.TagRequest{
+		URLs: c.URLs,
+	})
+
+	if err != nil {
+		return "", err
+	} else {
+		fmt.Printf("%+v\n", tagData) // See what we got!
 	}
 
 	return "Clarifai performed", nil
