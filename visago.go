@@ -5,6 +5,7 @@ import (
 	"os"
 
 	_ "github.com/zquestz/visago/plugins/clarifai"
+	_ "github.com/zquestz/visago/plugins/google_vision"
 
 	"github.com/zquestz/visago/cmd"
 )

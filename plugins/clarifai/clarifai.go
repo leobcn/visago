@@ -19,7 +19,7 @@ type Plugin struct {
 	configured bool
 	clientID   string
 	secret     string
-	tagResps   map[string]*clarifai.TagResp
+	responses  map[string]*clarifai.TagResp
 }
 
 // Perform gathers metadata from Clarifai, for the first pass
@@ -42,7 +42,7 @@ func (p *Plugin) Perform(c plugins.PluginConfig) (string, plugins.PluginResult, 
 
 	nuid := nuid.Next()
 
-	p.tagResps[nuid], err = client.Tag(clarifai.TagRequest{
+	p.responses[nuid], err = client.Tag(clarifai.TagRequest{
 		URLs: c.URLs,
 	})
 
@@ -57,11 +57,11 @@ func (p *Plugin) Perform(c plugins.PluginConfig) (string, plugins.PluginResult, 
 func (p *Plugin) Tags(requestID string) (tags map[string][]string, err error) {
 	tags = make(map[string][]string)
 
-	if p.tagResps[requestID] == nil {
+	if p.responses[requestID] == nil {
 		return tags, fmt.Errorf("request has not been made to clarifai")
 	}
 
-	for _, result := range p.tagResps[requestID].Results {
+	for _, result := range p.responses[requestID].Results {
 		tags[result.URL] = result.Result.Tag.Classes
 	}
 
@@ -70,7 +70,7 @@ func (p *Plugin) Tags(requestID string) (tags map[string][]string, err error) {
 
 // Reset clears the cache of existing responses.
 func (p *Plugin) Reset() {
-	p.tagResps = make(map[string]*clarifai.TagResp)
+	p.responses = make(map[string]*clarifai.TagResp)
 }
 
 // RequestIDs returns a list of all cached response
@@ -81,7 +81,7 @@ func (p *Plugin) RequestIDs() ([]string, error) {
 	}
 
 	keys := []string{}
-	for k := range p.tagResps {
+	for k := range p.responses {
 		keys = append(keys, k)
 	}
 
@@ -99,7 +99,7 @@ func (p *Plugin) Setup() error {
 		return fmt.Errorf("credentials not found")
 	}
 
-	p.tagResps = make(map[string]*clarifai.TagResp)
+	p.responses = make(map[string]*clarifai.TagResp)
 
 	p.clientID = id
 	p.secret = secret
