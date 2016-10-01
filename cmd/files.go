@@ -25,7 +25,7 @@ var FilesCmd = &cobra.Command{
 	Short: "Visual AI Aggregator",
 	Long:  `Visual AI Aggregator`,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := FilesCommand(cmd, args)
+		err := filesCommand(cmd, args)
 		if err != nil {
 			bail(err)
 		}
@@ -56,7 +56,7 @@ func prepareFlags() {
 }
 
 // Where all the work happens.
-func FilesCommand(cmd *cobra.Command, args []string) error {
+func filesCommand(cmd *cobra.Command, args []string) error {
 	if config.DisplayVersion {
 		fmt.Printf("%s %s\n", appName, version)
 		return nil
