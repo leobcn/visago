@@ -124,20 +124,26 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 				return err
 			}
 
-			if len(tags) > 0 {
-				for asset, tagList := range tags {
-					fmt.Printf("%s - %s\n", name, asset)
-					fmt.Printf("%v\n", tagList)
-				}
-			}
+			displayTags(name, tags)
 		}
-	} else {
-		// Don't return an error, help screen is more appropriate.
-		help := cmd.HelpFunc()
-		help(cmd, args)
+
+		return nil
 	}
 
+	// Don't return an error, help screen is more appropriate.
+	help := cmd.HelpFunc()
+	help(cmd, args)
+
 	return nil
+}
+
+func displayTags(name string, tags map[string][]string) {
+	if len(tags) > 0 {
+		for asset, tagList := range tags {
+			fmt.Printf("%s - %s\n", name, asset)
+			fmt.Printf("%v\n", tagList)
+		}
+	}
 }
 
 func sortItems(items []string) (urls []string, files []*os.File, errs []error) {
