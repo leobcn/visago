@@ -18,8 +18,14 @@ var (
 // different Visual AI backends. Plugins should
 // initialize themselves with a PluginConfig.
 type Plugin interface {
-	Perform(PluginConfig) (string, error)
+	Perform(PluginConfig) (PluginResult, error)
 	Setup() error
+}
+
+// PluginResult is an interface on returned objects
+// from the API.
+type PluginResult interface {
+	Tags() (map[string][]string, error)
 }
 
 // PluginConfig is used to pass configuration

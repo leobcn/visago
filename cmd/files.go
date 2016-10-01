@@ -119,11 +119,18 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 				fmt.Printf("[Warn] Failed running perform on %q plugin: %s\n", name, err)
 			}
 
-			if output != "" {
-				fmt.Println(output)
+			tags, err := output.Tags()
+			if err != nil {
+				return err
+			}
+
+			if len(tags) > 0 {
+				for asset, tagList := range tags {
+					fmt.Printf("%s - %s\n", name, asset)
+					fmt.Printf("%v\n", tagList)
+				}
 			}
 		}
-
 	} else {
 		// Don't return an error, help screen is more appropriate.
 		help := cmd.HelpFunc()

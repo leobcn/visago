@@ -15,41 +15,54 @@ func init() {
 // Plugin implements the Plugin interface and stores
 // configuration data needed by the clarifai library.
 type Plugin struct {
-	configured bool
-	clientID   string
-	secret     string
+	configured     bool
+	clientID       string
+	secret         string
+	tagResp        *clarifai.TagResp
+	processedURLs  []string
+	processedFiles []*os.File
 }
 
 // Perform gathers metadata from Clarifai, for the first pass
 // it only supports urls.
-func (p *Plugin) Perform(c plugins.PluginConfig) (string, error) {
+func (p *Plugin) Perform(c plugins.PluginConfig) (plugins.PluginResult, error) {
 	if p.configured == false {
-		return "", fmt.Errorf("not configured")
+		return nil, fmt.Errorf("not configured")
 	}
 
 	if len(c.URLs) == 0 {
-		return "", fmt.Errorf("must supply urls")
+		return nil, fmt.Errorf("must supply urls")
 	}
 
 	client := clarifai.NewClient(p.clientID, p.secret)
-	info, err := client.Info()
+	_, err := client.Info()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	fmt.Printf("%+v\n", info)
-
-	tagData, err := client.Tag(clarifai.TagRequest{
+	p.tagResp, err = client.Tag(clarifai.TagRequest{
 		URLs: c.URLs,
 	})
-
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	fmt.Printf("%+v\n", tagData)
+	return p, nil
+}
 
-	return "Clarifai performed", nil
+// Tags returns the tags on an entry
+func (p *Plugin) Tags() (tags map[string][]string, err error) {
+	tags = make(map[string][]string)
+
+	if p.tagResp == nil {
+		return tags, fmt.Errorf("request has not been made to clarifai")
+	}
+
+	for _, result := range p.tagResp.Results {
+		tags[result.URL] = result.Result.Tag.Classes
+	}
+
+	return
 }
 
 // Setup sets up the plugin for use.
