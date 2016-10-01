@@ -1,4 +1,4 @@
-[![License][License-Image]][License-URL] [![ReportCard][ReportCard-Image]][ReportCard-URL] 
+[![License][License-Image]][License-URL] [![ReportCard][ReportCard-Image]][ReportCard-URL] [![Build][Build-Status-Image]][Build-Status-URL]
 # visago
 Visual AI Aggregator
 
@@ -48,3 +48,5 @@ visago is released under the MIT license.
 [License-Image]: https://img.shields.io/npm/l/express.svg
 [ReportCard-URL]: http://goreportcard.com/report/zquestz/s
 [ReportCard-Image]: https://goreportcard.com/badge/github.com/zquestz/visago
+[Build-Status-URL]: http://travis-ci.org/zquestz/visago
+[Build-Status-Image]: https://travis-ci.org/zquestz/visago.svg?branch=master
