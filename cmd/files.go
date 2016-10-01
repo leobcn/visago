@@ -95,11 +95,11 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 
 		urls, files, errs := sortItems(itemList)
 		for _, err := range errs {
-			fmt.Printf("[Error] Failed to sort input: %v\n", err)
+			fmt.Printf("[Warn] Failed to sort input: %v\n", err)
 		}
 
 		if len(urls) == 0 && len(files) == 0 {
-			return fmt.Errorf("Didn't find any valid files or URLs")
+			return fmt.Errorf("failed to find any valid files or URLs")
 		}
 
 		pluginConfig := plugins.PluginConfig{

@@ -35,9 +35,9 @@ func (p *Plugin) Perform(c plugins.PluginConfig) (string, error) {
 	info, err := client.Info()
 	if err != nil {
 		return "", err
-	} else {
-		fmt.Printf("%+v\n", info)
 	}
+
+	fmt.Printf("%+v\n", info)
 
 	tagData, err := client.Tag(clarifai.TagRequest{
 		URLs: c.URLs,
@@ -45,9 +45,9 @@ func (p *Plugin) Perform(c plugins.PluginConfig) (string, error) {
 
 	if err != nil {
 		return "", err
-	} else {
-		fmt.Printf("%+v\n", tagData) // See what we got!
 	}
+
+	fmt.Printf("%+v\n", tagData)
 
 	return "Clarifai performed", nil
 }
