@@ -117,6 +117,7 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 			requestID, pluginResponse, err := plugins.Plugins[name].Perform(pluginConfig)
 			if err != nil {
 				fmt.Printf("[Warn] Failed running perform on %q plugin: %s\n", name, err)
+				continue
 			}
 
 			tagMap, err := pluginResponse.Tags(requestID)
