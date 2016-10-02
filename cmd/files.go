@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -16,7 +17,7 @@ import (
 
 const (
 	appName = "visago"
-	version = "0.0.1"
+	version = "0.0.2"
 )
 
 // Stores configuration data.
@@ -56,6 +57,8 @@ func prepareFlags() {
 		&config.Verbose, "verbose", "v", config.Verbose, "verbose mode")
 	FilesCmd.PersistentFlags().BoolVarP(
 		&config.ListPlugins, "list-plugins", "l", false, "list supported plugins")
+	FilesCmd.PersistentFlags().BoolVarP(
+		&config.JSONOutput, "json", "j", false, "provide JSON output")
 }
 
 // Where all the work happens.
@@ -192,10 +195,15 @@ func displayTags(name string, tagMap map[string][]string) string {
 	var buf []byte
 	output := bytes.NewBuffer(buf)
 
-	if len(tagMap) > 0 {
-		for asset, tags := range tagMap {
-			output.WriteString(fmt.Sprintf("%s - %s\n", name, asset))
-			output.WriteString(fmt.Sprintf("%v\n", tags))
+	if config.JSONOutput {
+		b, _ := json.Marshal(tagMap)
+		output.WriteString(fmt.Sprintf("%s\n", b))
+	} else {
+		if len(tagMap) > 0 {
+			for asset, tags := range tagMap {
+				output.WriteString(fmt.Sprintf("%s - %s\n", name, asset))
+				output.WriteString(fmt.Sprintf("%v\n", tags))
+			}
 		}
 	}
 

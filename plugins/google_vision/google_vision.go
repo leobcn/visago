@@ -55,15 +55,15 @@ func (p *Plugin) Perform(c *plugins.PluginConfig) (string, plugins.PluginResult,
 		return "", nil, err
 	}
 
-	nuid := nuid.Next()
+	requestID := nuid.Next()
 
-	p.urls[nuid] = c.URLs
-	p.responses[nuid], err = client.ImagesService().Annotate(batch).Do()
+	p.urls[requestID] = c.URLs
+	p.responses[requestID], err = client.ImagesService().Annotate(batch).Do()
 	if err != nil {
 		return "", nil, err
 	}
 
-	return nuid, p, nil
+	return requestID, p, nil
 }
 
 // Tags returns the tags on an entry
