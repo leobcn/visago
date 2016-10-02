@@ -110,7 +110,7 @@ func displayOutput(runners []*runner, jsonOutput bool) {
 
 			for asset, tags := range v {
 				fmt.Printf("- %s\n", asset)
-				fmt.Printf("  %v\n", tags)
+				fmt.Printf("%v\n\n", tags)
 			}
 		}
 	}
