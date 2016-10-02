@@ -6,6 +6,7 @@ import (
 
 	_ "github.com/zquestz/visago/plugins/clarifai"
 	_ "github.com/zquestz/visago/plugins/googlevision"
+	_ "github.com/zquestz/visago/plugins/imagga"
 
 	"github.com/zquestz/visago/cmd"
 )
