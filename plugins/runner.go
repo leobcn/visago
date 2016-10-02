@@ -8,6 +8,10 @@ import (
 	"github.com/zquestz/visago/util"
 )
 
+const (
+	errorKey = "errors"
+)
+
 // RunPlugins runs all the plugins with the provided pluginConfig.
 // Output is directed at stdout. Not intended for API use.
 func RunPlugins(pluginConfig *PluginConfig, jsonOutput bool) error {
@@ -82,7 +86,6 @@ func displayOutput(runners []*runner, jsonOutput bool) {
 		}
 
 		if len(r.Errors) > 0 {
-			errorKey := "errors"
 			output[r.Name][errorKey] = []string{}
 			for _, e := range r.Errors {
 				output[r.Name][errorKey] = append(output[r.Name][errorKey], e.Error())
