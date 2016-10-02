@@ -1,4 +1,4 @@
-package google_vision
+package googlevision
 
 import (
 	"fmt"
