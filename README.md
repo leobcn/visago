@@ -23,6 +23,22 @@ make
 make install
 ```
 
+## Integration
+
+The `visagoapi` package is available for developers who want to integrate visual AI results in their software.
+
+```
+pluginConfig := &visagoapi.PluginConfig{
+	URLs: []string{"http://example.com/image.png"},
+}
+
+output, _ := visagoapi.RunPlugins(pluginConfig, true)
+
+fmt.Printf(output)
+```
+
+There is also a sample integration in `/example/main.go`.
+
 ## Configuration
 
 To setup your own default configuration just create `~/.visago/config`. The configuration file is in UCL format. JSON is also fully supported as UCL can parse JSON files.
