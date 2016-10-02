@@ -122,13 +122,14 @@ func displayOutput(runners []*runner, jsonOutput bool) {
 func (r *runner) run(name string, pluginConfig *PluginConfig, wg *sync.WaitGroup, outputChan chan<- []string, runChan chan<- *runner) {
 	defer wg.Done()
 
+	defer func() { runChan <- r }()
+
 	err := Plugins[name].Setup()
 	if err != nil {
 		if pluginConfig.Verbose {
 			outputChan <- []string{"warn", fmt.Sprintf("Failed to setup %q plugin: %s\n", name, err)}
 		}
 		r.Errors = append(r.Errors, err)
-		runChan <- r
 		return
 	}
 
@@ -138,7 +139,6 @@ func (r *runner) run(name string, pluginConfig *PluginConfig, wg *sync.WaitGroup
 			outputChan <- []string{"warn", fmt.Sprintf("Failed running perform on %q plugin: %s\n", name, err)}
 		}
 		r.Errors = append(r.Errors, err)
-		runChan <- r
 		return
 	}
 
@@ -148,13 +148,10 @@ func (r *runner) run(name string, pluginConfig *PluginConfig, wg *sync.WaitGroup
 			outputChan <- []string{"warn", fmt.Sprintf("Failed to fetch tags from plugin %q: %s\n", name, err)}
 		}
 		r.Errors = append(r.Errors, err)
-		runChan <- r
 		return
 	}
 
 	r.TagMap = tagMap
-
-	runChan <- r
 
 	return
 }
