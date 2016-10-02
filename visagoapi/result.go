@@ -35,6 +35,7 @@ func mergeAssets(assets []*Asset) []*Asset {
 			mergedAsset.Tags = append(mergedAsset.Tags, a.Tags...)
 		}
 
+		// TODO: This really needs to be based on confidence score.
 		mergedAsset.Tags = util.RemoveDuplicatesUnordered(mergedAsset.Tags)
 
 		mergedAssets = append(mergedAssets, &mergedAsset)

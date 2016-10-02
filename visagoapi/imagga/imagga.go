@@ -27,6 +27,7 @@ type Plugin struct {
 
 // Perform gathers metadata from imagga, for the first pass
 // it only supports urls.
+// TODO: Implement file handling.
 func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginResult, error) {
 	if p.configured == false {
 		return "", nil, fmt.Errorf("not configured")

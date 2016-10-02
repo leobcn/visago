@@ -115,7 +115,7 @@ func buildOutput(runners []*runner) map[string]*Result {
 }
 
 func displayOutput(output map[string]*Result, jsonOutput bool) string {
-	outputBuf := bytes.NewBuffer([]byte{})
+	var outputBuf bytes.Buffer
 
 	if len(output) == 0 {
 		return ""
