@@ -11,6 +11,12 @@ const (
 	errorKey = "errors"
 )
 
+type runner struct {
+	Name   string
+	TagMap map[string][]string
+	Errors []error
+}
+
 // RunPlugins runs all the plugins with the provided pluginConfig.
 // Output is directed at stdout. Not intended for API use.
 func RunPlugins(pluginConfig *PluginConfig, jsonOutput bool) (string, error) {
@@ -50,12 +56,6 @@ func RunPlugins(pluginConfig *PluginConfig, jsonOutput bool) (string, error) {
 	return output, nil
 }
 
-type runner struct {
-	Name   string
-	TagMap map[string][]string
-	Errors []error
-}
-
 func processOutput(wg *sync.WaitGroup, outputChan chan<- string, runChan <-chan *runner, finishedChan <-chan bool, jsonOutput bool) {
 	defer wg.Done()
 
@@ -76,30 +76,35 @@ Loop:
 	return
 }
 
-func buildOutput(runners []*runner) map[string]map[string][]string {
-	output := make(map[string]map[string][]string)
+func buildOutput(runners []*runner) map[string]*Result {
+	output := make(map[string]*Result)
 
 	for _, r := range runners {
 		if _, ok := output[r.Name]; !ok {
-			output[r.Name] = make(map[string][]string)
+			output[r.Name] = &Result{}
 		}
 
 		if len(r.Errors) > 0 {
-			output[r.Name][errorKey] = []string{}
+			output[r.Name].Errors = []string{}
 			for _, e := range r.Errors {
-				output[r.Name][errorKey] = append(output[r.Name][errorKey], e.Error())
+				output[r.Name].Errors = append(output[r.Name].Errors, e.Error())
 			}
 		}
 
 		for k, v := range r.TagMap {
-			output[r.Name][k] = v
+			asset := Asset{
+				Name: k,
+				Tags: v,
+			}
+
+			output[r.Name].Assets = append(output[r.Name].Assets, &asset)
 		}
 	}
 
 	return output
 }
 
-func displayOutput(output map[string]map[string][]string, jsonOutput bool) string {
+func displayOutput(output map[string]*Result, jsonOutput bool) string {
 	outputBuf := bytes.NewBuffer([]byte{})
 
 	if len(output) == 0 {
@@ -116,9 +121,17 @@ func displayOutput(output map[string]map[string][]string, jsonOutput bool) strin
 		for k, v := range output {
 			outputBuf.WriteString(fmt.Sprintf("%s\n", k))
 
-			for asset, tags := range v {
-				outputBuf.WriteString(fmt.Sprintf("- %s\n", asset))
-				outputBuf.WriteString(fmt.Sprintf("%v\n\n", tags))
+			for _, asset := range v.Assets {
+				outputBuf.WriteString(fmt.Sprintf("- %s\n", asset.Name))
+				outputBuf.WriteString(fmt.Sprintf("%v\n", asset.Tags))
+			}
+
+			for _, err := range output[k].Errors {
+				outputBuf.WriteString(fmt.Sprintf("- %v\n", err))
+			}
+
+			if len(output[k].Errors) > 0 {
+
 			}
 		}
 	}
