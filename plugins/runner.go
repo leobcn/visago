@@ -129,10 +129,6 @@ func displayOutput(output map[string]*Result, jsonOutput bool) string {
 			for _, err := range output[k].Errors {
 				outputBuf.WriteString(fmt.Sprintf("- %v\n", err))
 			}
-
-			if len(output[k].Errors) > 0 {
-
-			}
 		}
 	}
 
