@@ -72,12 +72,12 @@ Loop:
 		}
 	}
 
-	displayOutput(runners, jsonOutput)
+	displayOutput(buildOutput(runners), jsonOutput)
 
 	return
 }
 
-func displayOutput(runners []*runner, jsonOutput bool) {
+func buildOutput(runners []*runner) map[string]map[string][]string {
 	output := make(map[string]map[string][]string)
 
 	for _, r := range runners {
@@ -97,6 +97,10 @@ func displayOutput(runners []*runner, jsonOutput bool) {
 		}
 	}
 
+	return output
+}
+
+func displayOutput(output map[string]map[string][]string, jsonOutput bool) {
 	if len(output) == 0 {
 		return
 	}
