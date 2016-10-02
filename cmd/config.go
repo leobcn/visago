@@ -16,7 +16,7 @@ type Config struct {
 	ListPlugins    bool     `json:"-"`
 	Verbose        bool     `json:"verbose,string"`
 	Whitelist      []string `json:"whitelist"`
-	JSONOutput     bool     `json:"json_output"`
+	JSONOutput     bool     `json:"json_output,string"`
 }
 
 // Load reads the configuration from ~/.visago/config and loads it into the Config struct.

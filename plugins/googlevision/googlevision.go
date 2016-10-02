@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	plugins.AddPlugin("google_vision", &Plugin{})
+	plugins.AddPlugin("googlevision", &Plugin{})
 }
 
 // Plugin implements the Plugin interface and stores
