@@ -12,7 +12,7 @@ import (
 )
 
 // Simple app that processes URLs from the command line.
-// Here to illustrate the simplest way to use visago
+// Here to illustrate the simplest way to use the visagoapi
 // in your projects.
 //
 // Example: go run main.go <imageUrls...>

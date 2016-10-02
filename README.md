@@ -37,7 +37,7 @@ output, _ := visagoapi.RunPlugins(pluginConfig, true)
 fmt.Printf(output)
 ```
 
-There is also a sample integration in `/example/main.go`.
+There is also an example integration in `/example/main.go`.
 
 ## Configuration
 
