@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"net/url"
+	"os"
 
 	"github.com/nats-io/nuid"
 	"github.com/zquestz/visago/plugins"
@@ -20,8 +20,8 @@ func init() {
 // configuration data needed by the imagga library.
 type Plugin struct {
 	configured bool
-	api_key    string
-	api_secret string
+	apiKey     string
+	apiSecret  string
 	responses  map[string][]*response
 }
 
@@ -42,7 +42,7 @@ func (p *Plugin) Perform(c *plugins.PluginConfig) (string, plugins.PluginResult,
 
 	for _, uri := range c.URLs {
 		req, _ := http.NewRequest("GET", "https://api.imagga.com/v1/tagging?url="+url.QueryEscape(uri), nil)
-		req.SetBasicAuth(p.api_key, p.api_secret)
+		req.SetBasicAuth(p.apiKey, p.apiSecret)
 
 		resp, err := client.Do(req)
 		if err != nil {
@@ -127,8 +127,8 @@ func (p *Plugin) Setup() error {
 
 	p.responses = make(map[string][]*response)
 
-	p.api_key = id
-	p.api_secret = secret
+	p.apiKey = id
+	p.apiSecret = secret
 	p.configured = true
 
 	return nil
