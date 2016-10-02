@@ -43,7 +43,7 @@ func RemoveDuplicatesUnordered(elements []string) []string {
 	}
 
 	result := []string{}
-	for k, _ := range encountered {
+	for k := range encountered {
 		result = append(result, k)
 	}
 
