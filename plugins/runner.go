@@ -48,6 +48,7 @@ func RunPlugins(pluginConfig *PluginConfig, jsonOutput bool) error {
 type runner struct {
 	Name   string
 	TagMap map[string][]string
+	Errors []error
 }
 
 func processOutput(wg *sync.WaitGroup, outputChan <-chan []string, runChan <-chan *runner, finishedChan <-chan bool, jsonOutput bool) {
@@ -61,9 +62,7 @@ Loop:
 		case output := <-outputChan:
 			util.SmartPrint(output[0], output[1], jsonOutput)
 		case runner := <-runChan:
-			if len(runner.TagMap) > 0 {
-				runners = append(runners, runner)
-			}
+			runners = append(runners, runner)
 		case <-finishedChan:
 			break Loop
 		}
@@ -82,9 +81,21 @@ func displayOutput(runners []*runner, jsonOutput bool) {
 			output[r.Name] = make(map[string][]string)
 		}
 
+		if len(r.Errors) > 0 {
+			errorKey := "error"
+			output[r.Name][errorKey] = []string{}
+			for _, e := range r.Errors {
+				output[r.Name][errorKey] = append(output[r.Name][errorKey], e.Error())
+			}
+		}
+
 		for k, v := range r.TagMap {
 			output[r.Name][k] = v
 		}
+	}
+
+	if len(output) == 0 {
+		return
 	}
 
 	if jsonOutput {
@@ -110,19 +121,31 @@ func (r *runner) run(name string, pluginConfig *PluginConfig, wg *sync.WaitGroup
 
 	err := Plugins[name].Setup()
 	if err != nil {
-		outputChan <- []string{"warn", fmt.Sprintf("Failed to setup %q plugin: %s\n", name, err)}
+		if pluginConfig.Verbose {
+			outputChan <- []string{"warn", fmt.Sprintf("Failed to setup %q plugin: %s\n", name, err)}
+		}
+		r.Errors = append(r.Errors, err)
+		runChan <- r
 		return
 	}
 
 	requestID, pluginResponse, err := Plugins[name].Perform(pluginConfig)
 	if err != nil {
-		outputChan <- []string{"warn", fmt.Sprintf("Failed running perform on %q plugin: %s\n", name, err)}
+		if pluginConfig.Verbose {
+			outputChan <- []string{"warn", fmt.Sprintf("Failed running perform on %q plugin: %s\n", name, err)}
+		}
+		r.Errors = append(r.Errors, err)
+		runChan <- r
 		return
 	}
 
 	tagMap, err := pluginResponse.Tags(requestID)
 	if err != nil {
-		outputChan <- []string{"warn", fmt.Sprintf("Failed to fetch tags from plugin %q: %s\n", name, err)}
+		if pluginConfig.Verbose {
+			outputChan <- []string{"warn", fmt.Sprintf("Failed to fetch tags from plugin %q: %s\n", name, err)}
+		}
+		r.Errors = append(r.Errors, err)
+		runChan <- r
 		return
 	}
 
