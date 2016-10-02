@@ -1,7 +1,6 @@
 package plugins
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"sync"
@@ -13,44 +12,100 @@ import (
 // Output is directed at stdout. Not intended for API use.
 func RunPlugins(pluginConfig *PluginConfig, jsonOutput bool) error {
 	wg := &sync.WaitGroup{}
+	dwg := &sync.WaitGroup{}
 
 	outputChan := make(chan []string)
 	defer close(outputChan)
 
+	runChan := make(chan *runner)
+	defer close(runChan)
+
 	finishedChan := make(chan bool)
 	defer close(finishedChan)
 
-	wg.Add(1)
-	go processPluginOutput(wg, outputChan, finishedChan, jsonOutput)
+	dwg.Add(1)
+	go processOutput(dwg, outputChan, runChan, finishedChan, jsonOutput)
 
 	for _, name := range PluginNames() {
 		wg.Add(1)
-		go runPlugin(name, pluginConfig, wg, outputChan, jsonOutput)
+		r := runner{
+			Name: name,
+		}
+		go r.run(name, pluginConfig, wg, outputChan, runChan)
 	}
 
+	// Wait for plugins to finish.
 	wg.Wait()
 
 	finishedChan <- true
 
+	// Wait for display goroutine to end.
+	dwg.Wait()
+
 	return nil
 }
 
-func processPluginOutput(wg *sync.WaitGroup, outputChan <-chan []string, finishedChan <-chan bool, jsonOutput bool) {
-	wg.Done()
+type runner struct {
+	Name   string
+	TagMap map[string][]string
+}
+
+func processOutput(wg *sync.WaitGroup, outputChan <-chan []string, runChan <-chan *runner, finishedChan <-chan bool, jsonOutput bool) {
+	defer wg.Done()
+
+	runners := []*runner{}
 
 Loop:
 	for {
 		select {
 		case output := <-outputChan:
 			util.SmartPrint(output[0], output[1], jsonOutput)
+		case runner := <-runChan:
+			if len(runner.TagMap) > 0 {
+				runners = append(runners, runner)
+			}
 		case <-finishedChan:
 			break Loop
 		}
 	}
+
+	displayOutput(runners, jsonOutput)
+
 	return
 }
 
-func runPlugin(name string, pluginConfig *PluginConfig, wg *sync.WaitGroup, outputChan chan<- []string, jsonOutput bool) {
+func displayOutput(runners []*runner, jsonOutput bool) {
+	output := make(map[string]map[string][]string)
+
+	for _, r := range runners {
+		if _, ok := output[r.Name]; !ok {
+			output[r.Name] = make(map[string][]string)
+		}
+
+		for k, v := range r.TagMap {
+			output[r.Name][k] = v
+		}
+	}
+
+	if jsonOutput {
+		b, err := json.MarshalIndent(output, "", "  ")
+		if err != nil {
+			fmt.Printf("%s", err)
+		}
+		fmt.Printf("%s\n", b)
+	} else {
+		for k, v := range output {
+			fmt.Printf("%s\n", k)
+
+			for asset, tags := range v {
+				fmt.Printf("- %s\n", asset)
+				fmt.Printf("  %v\n", tags)
+			}
+		}
+	}
+}
+
+func (r *runner) run(name string, pluginConfig *PluginConfig, wg *sync.WaitGroup, outputChan chan<- []string, runChan chan<- *runner) {
 	defer wg.Done()
 
 	err := Plugins[name].Setup()
@@ -71,26 +126,9 @@ func runPlugin(name string, pluginConfig *PluginConfig, wg *sync.WaitGroup, outp
 		return
 	}
 
-	outputChan <- []string{"", displayTags(name, tagMap, jsonOutput)}
+	r.TagMap = tagMap
+
+	runChan <- r
 
 	return
-}
-
-func displayTags(name string, tagMap map[string][]string, jsonOutput bool) string {
-	var buf []byte
-	output := bytes.NewBuffer(buf)
-
-	if jsonOutput {
-		b, _ := json.Marshal(tagMap)
-		output.WriteString(fmt.Sprintf("%s\n", b))
-	} else {
-		if len(tagMap) > 0 {
-			for asset, tags := range tagMap {
-				output.WriteString(fmt.Sprintf("%s - %s\n", name, asset))
-				output.WriteString(fmt.Sprintf("%v\n", tags))
-			}
-		}
-	}
-
-	return output.String()
 }

@@ -131,7 +131,6 @@ func sortItems(items []string) (urls []string, files []string, errs []error) {
 		_, err := os.Stat(item)
 		if err == nil {
 			files = append(files, item)
-
 			continue
 		}
 
