@@ -2,7 +2,6 @@ package plugins
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 )
@@ -35,8 +34,8 @@ type PluginResult interface {
 // PluginConfig is used to pass configuration
 // data to plugins when they load.
 type PluginConfig struct {
-	URLs  []string   `json:"-"`
-	Files []*os.File `json:"-"`
+	URLs  []string `json:"-"`
+	Files []string `json:"-"`
 }
 
 // Plugins tracks loaded plugins.
