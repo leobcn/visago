@@ -15,7 +15,7 @@ import (
 
 const (
 	appName = "visago"
-	version = "0.0.2"
+	version = "0.0.3"
 )
 
 // Stores configuration data.
@@ -107,8 +107,9 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 		}
 
 		pluginConfig := &plugins.PluginConfig{
-			URLs:  urls,
-			Files: files,
+			URLs:    urls,
+			Files:   files,
+			Verbose: config.Verbose,
 		}
 
 		err := plugins.RunPlugins(pluginConfig, config.JSONOutput)

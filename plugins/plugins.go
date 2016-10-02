@@ -34,8 +34,9 @@ type PluginResult interface {
 // PluginConfig is used to pass configuration
 // data to plugins when they load.
 type PluginConfig struct {
-	URLs  []string `json:"-"`
-	Files []string `json:"-"`
+	URLs    []string `json:"-"`
+	Files   []string `json:"-"`
+	Verbose bool     `json:"-"`
 }
 
 // Plugins tracks loaded plugins.
