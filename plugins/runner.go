@@ -1,17 +1,17 @@
-package cmd
+package plugins
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"os"
 	"sync"
 
-	"github.com/asaskevich/govalidator"
-	"github.com/zquestz/visago/plugins"
+	"github.com/zquestz/visago/util"
 )
 
-func runPlugins(pluginConfig *plugins.PluginConfig) error {
+// RunPlugins runs all the plugins with the provided pluginConfig.
+// Output is directed at stdout. Not intended for API use.
+func RunPlugins(pluginConfig *PluginConfig, jsonOutput bool) error {
 	wg := &sync.WaitGroup{}
 
 	outputChan := make(chan []string)
@@ -21,11 +21,11 @@ func runPlugins(pluginConfig *plugins.PluginConfig) error {
 	defer close(finishedChan)
 
 	wg.Add(1)
-	go processPluginOutput(wg, outputChan, finishedChan)
+	go processPluginOutput(wg, outputChan, finishedChan, jsonOutput)
 
-	for _, name := range plugins.PluginNames() {
+	for _, name := range PluginNames() {
 		wg.Add(1)
-		go runPlugin(name, pluginConfig, wg, outputChan)
+		go runPlugin(name, pluginConfig, wg, outputChan, jsonOutput)
 	}
 
 	wg.Wait()
@@ -35,14 +35,14 @@ func runPlugins(pluginConfig *plugins.PluginConfig) error {
 	return nil
 }
 
-func processPluginOutput(wg *sync.WaitGroup, outputChan <-chan []string, finishedChan <-chan bool) {
+func processPluginOutput(wg *sync.WaitGroup, outputChan <-chan []string, finishedChan <-chan bool, jsonOutput bool) {
 	wg.Done()
 
 Loop:
 	for {
 		select {
 		case output := <-outputChan:
-			smartPrint(output[0], output[1])
+			util.SmartPrint(output[0], output[1], jsonOutput)
 		case <-finishedChan:
 			break Loop
 		}
@@ -50,16 +50,16 @@ Loop:
 	return
 }
 
-func runPlugin(name string, pluginConfig *plugins.PluginConfig, wg *sync.WaitGroup, outputChan chan<- []string) {
+func runPlugin(name string, pluginConfig *PluginConfig, wg *sync.WaitGroup, outputChan chan<- []string, jsonOutput bool) {
 	defer wg.Done()
 
-	err := plugins.Plugins[name].Setup()
+	err := Plugins[name].Setup()
 	if err != nil {
 		outputChan <- []string{"warn", fmt.Sprintf("Failed to setup %q plugin: %s\n", name, err)}
 		return
 	}
 
-	requestID, pluginResponse, err := plugins.Plugins[name].Perform(pluginConfig)
+	requestID, pluginResponse, err := Plugins[name].Perform(pluginConfig)
 	if err != nil {
 		outputChan <- []string{"warn", fmt.Sprintf("Failed running perform on %q plugin: %s\n", name, err)}
 		return
@@ -71,16 +71,16 @@ func runPlugin(name string, pluginConfig *plugins.PluginConfig, wg *sync.WaitGro
 		return
 	}
 
-	outputChan <- []string{"", displayTags(name, tagMap)}
+	outputChan <- []string{"", displayTags(name, tagMap, jsonOutput)}
 
 	return
 }
 
-func displayTags(name string, tagMap map[string][]string) string {
+func displayTags(name string, tagMap map[string][]string, jsonOutput bool) string {
 	var buf []byte
 	output := bytes.NewBuffer(buf)
 
-	if config.JSONOutput {
+	if jsonOutput {
 		b, _ := json.Marshal(tagMap)
 		output.WriteString(fmt.Sprintf("%s\n", b))
 	} else {
@@ -93,25 +93,4 @@ func displayTags(name string, tagMap map[string][]string) string {
 	}
 
 	return output.String()
-}
-
-func sortItems(items []string) (urls []string, files []string, errs []error) {
-	for _, item := range items {
-		_, err := os.Stat(item)
-		if err == nil {
-			files = append(files, item)
-
-			continue
-		}
-
-		valid := govalidator.IsURL(item)
-		if valid {
-			urls = append(urls, item)
-			continue
-		}
-
-		errs = append(errs, fmt.Errorf("%q is not a file or url", item))
-	}
-
-	return
 }

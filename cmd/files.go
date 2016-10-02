@@ -1,15 +1,16 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"runtime"
 	"strings"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/spf13/cobra"
 	"github.com/zquestz/visago/plugins"
+	"github.com/zquestz/visago/util"
 )
 
 const (
@@ -97,11 +98,11 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 
 		urls, files, errs := sortItems(itemList)
 		for _, err := range errs {
-			smartPrint("warn", fmt.Sprintf("Failed to sort input: %v\n", err))
+			util.SmartPrint("warn", fmt.Sprintf("Failed to sort input: %v\n", err), config.JSONOutput)
 		}
 
 		if len(urls) == 0 && len(files) == 0 {
-			smartPrint("error", fmt.Sprintf("failed to find any valid files or URLs"))
+			util.SmartPrint("error", fmt.Sprintf("failed to find any valid files or URLs"), config.JSONOutput)
 			return nil
 		}
 
@@ -110,7 +111,7 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 			Files: files,
 		}
 
-		err := runPlugins(pluginConfig)
+		err := plugins.RunPlugins(pluginConfig, config.JSONOutput)
 		if err != nil {
 			return err
 		}
@@ -125,23 +126,23 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func smartPrint(severity, m string) {
-	if config.JSONOutput {
-		if severity == "" {
-			fmt.Printf(m)
-			return
+func sortItems(items []string) (urls []string, files []string, errs []error) {
+	for _, item := range items {
+		_, err := os.Stat(item)
+		if err == nil {
+			files = append(files, item)
+
+			continue
 		}
 
-		outMap := make(map[string]string)
-		outMap[severity] = m
+		valid := govalidator.IsURL(item)
+		if valid {
+			urls = append(urls, item)
+			continue
+		}
 
-		b, _ := json.Marshal(outMap)
-		fmt.Printf(fmt.Sprintf("%s\n", b))
-
-		return
+		errs = append(errs, fmt.Errorf("%q is not a file or url", item))
 	}
-
-	fmt.Printf("[%s] %s", strings.ToUpper(severity), m)
 
 	return
 }
