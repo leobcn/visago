@@ -82,7 +82,7 @@ func displayOutput(runners []*runner, jsonOutput bool) {
 		}
 
 		if len(r.Errors) > 0 {
-			errorKey := "error"
+			errorKey := "errors"
 			output[r.Name][errorKey] = []string{}
 			for _, e := range r.Errors {
 				output[r.Name][errorKey] = append(output[r.Name][errorKey], e.Error())
