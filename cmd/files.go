@@ -112,10 +112,12 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 			Verbose: config.Verbose,
 		}
 
-		err := plugins.RunPlugins(pluginConfig, config.JSONOutput)
+		output, err := plugins.RunPlugins(pluginConfig, config.JSONOutput)
 		if err != nil {
 			return err
 		}
+
+		fmt.Printf(output)
 
 		return nil
 	}

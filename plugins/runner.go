@@ -1,11 +1,10 @@
 package plugins
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"sync"
-
-	"github.com/zquestz/visago/util"
 )
 
 const (
@@ -14,11 +13,11 @@ const (
 
 // RunPlugins runs all the plugins with the provided pluginConfig.
 // Output is directed at stdout. Not intended for API use.
-func RunPlugins(pluginConfig *PluginConfig, jsonOutput bool) error {
+func RunPlugins(pluginConfig *PluginConfig, jsonOutput bool) (string, error) {
 	wg := &sync.WaitGroup{}
 	dwg := &sync.WaitGroup{}
 
-	outputChan := make(chan []string)
+	outputChan := make(chan string)
 	defer close(outputChan)
 
 	runChan := make(chan *runner)
@@ -35,7 +34,7 @@ func RunPlugins(pluginConfig *PluginConfig, jsonOutput bool) error {
 		r := runner{
 			Name: name,
 		}
-		go r.run(name, pluginConfig, wg, outputChan, runChan)
+		go r.run(name, pluginConfig, wg, runChan)
 	}
 
 	// Wait for plugins to finish.
@@ -43,10 +42,12 @@ func RunPlugins(pluginConfig *PluginConfig, jsonOutput bool) error {
 
 	finishedChan <- true
 
+	output := <-outputChan
+
 	// Wait for display goroutine to end.
 	dwg.Wait()
 
-	return nil
+	return output, nil
 }
 
 type runner struct {
@@ -55,7 +56,7 @@ type runner struct {
 	Errors []error
 }
 
-func processOutput(wg *sync.WaitGroup, outputChan <-chan []string, runChan <-chan *runner, finishedChan <-chan bool, jsonOutput bool) {
+func processOutput(wg *sync.WaitGroup, outputChan chan<- string, runChan <-chan *runner, finishedChan <-chan bool, jsonOutput bool) {
 	defer wg.Done()
 
 	runners := []*runner{}
@@ -63,8 +64,6 @@ func processOutput(wg *sync.WaitGroup, outputChan <-chan []string, runChan <-cha
 Loop:
 	for {
 		select {
-		case output := <-outputChan:
-			util.SmartPrint(output[0], output[1], jsonOutput)
 		case runner := <-runChan:
 			runners = append(runners, runner)
 		case <-finishedChan:
@@ -72,7 +71,7 @@ Loop:
 		}
 	}
 
-	displayOutput(buildOutput(runners), jsonOutput)
+	outputChan <- displayOutput(buildOutput(runners), jsonOutput)
 
 	return
 }
@@ -100,57 +99,52 @@ func buildOutput(runners []*runner) map[string]map[string][]string {
 	return output
 }
 
-func displayOutput(output map[string]map[string][]string, jsonOutput bool) {
+func displayOutput(output map[string]map[string][]string, jsonOutput bool) string {
+	outputBuf := bytes.NewBuffer([]byte{})
+
 	if len(output) == 0 {
-		return
+		return ""
 	}
 
 	if jsonOutput {
 		b, err := json.MarshalIndent(output, "", "  ")
 		if err != nil {
-			fmt.Printf("%s", err)
+			outputBuf.WriteString(fmt.Sprintf("%s", err))
 		}
-		fmt.Printf("%s\n", b)
+		outputBuf.WriteString(fmt.Sprintf("%s\n", b))
 	} else {
 		for k, v := range output {
-			fmt.Printf("%s\n", k)
+			outputBuf.WriteString(fmt.Sprintf("%s\n", k))
 
 			for asset, tags := range v {
-				fmt.Printf("- %s\n", asset)
-				fmt.Printf("%v\n\n", tags)
+				outputBuf.WriteString(fmt.Sprintf("- %s\n", asset))
+				outputBuf.WriteString(fmt.Sprintf("%v\n\n", tags))
 			}
 		}
 	}
+
+	return outputBuf.String()
 }
 
-func (r *runner) run(name string, pluginConfig *PluginConfig, wg *sync.WaitGroup, outputChan chan<- []string, runChan chan<- *runner) {
+func (r *runner) run(name string, pluginConfig *PluginConfig, wg *sync.WaitGroup, runChan chan<- *runner) {
 	defer wg.Done()
 
 	defer func() { runChan <- r }()
 
 	err := Plugins[name].Setup()
 	if err != nil {
-		if pluginConfig.Verbose {
-			outputChan <- []string{"warn", fmt.Sprintf("Failed to setup %q plugin: %s\n", name, err)}
-		}
 		r.Errors = append(r.Errors, err)
 		return
 	}
 
 	requestID, pluginResponse, err := Plugins[name].Perform(pluginConfig)
 	if err != nil {
-		if pluginConfig.Verbose {
-			outputChan <- []string{"warn", fmt.Sprintf("Failed running perform on %q plugin: %s\n", name, err)}
-		}
 		r.Errors = append(r.Errors, err)
 		return
 	}
 
 	tagMap, err := pluginResponse.Tags(requestID)
 	if err != nil {
-		if pluginConfig.Verbose {
-			outputChan <- []string{"warn", fmt.Sprintf("Failed to fetch tags from plugin %q: %s\n", name, err)}
-		}
 		r.Errors = append(r.Errors, err)
 		return
 	}
