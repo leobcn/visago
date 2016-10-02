@@ -32,3 +32,20 @@ func SmartPrint(severity, m string, jsonOut bool) {
 
 	return
 }
+
+// RemoveDuplicatesUnordered removes duplicate strings from a slice.
+// with no guarantee on order.
+func RemoveDuplicatesUnordered(elements []string) []string {
+	encountered := map[string]bool{}
+
+	for v := range elements {
+		encountered[elements[v]] = true
+	}
+
+	result := []string{}
+	for k, _ := range encountered {
+		result = append(result, k)
+	}
+
+	return result
+}

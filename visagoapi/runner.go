@@ -9,6 +9,7 @@ import (
 
 const (
 	errorKey = "errors"
+	allKey   = "all"
 )
 
 type runner struct {
@@ -79,6 +80,9 @@ Loop:
 func buildOutput(runners []*runner) map[string]*Result {
 	output := make(map[string]*Result)
 
+	output[allKey] = &Result{}
+	allAssets := []*Asset{}
+
 	for _, r := range runners {
 		if _, ok := output[r.Name]; !ok {
 			output[r.Name] = &Result{}
@@ -88,6 +92,7 @@ func buildOutput(runners []*runner) map[string]*Result {
 			output[r.Name].Errors = []string{}
 			for _, e := range r.Errors {
 				output[r.Name].Errors = append(output[r.Name].Errors, e.Error())
+				output[allKey].Errors = append(output[allKey].Errors, e.Error())
 			}
 		}
 
@@ -98,8 +103,13 @@ func buildOutput(runners []*runner) map[string]*Result {
 			}
 
 			output[r.Name].Assets = append(output[r.Name].Assets, &asset)
+
+			allAssets = append(allAssets, &asset)
 		}
 	}
+
+	mergedAssets := mergeAssets(allAssets)
+	output[allKey].Assets = mergedAssets
 
 	return output
 }
