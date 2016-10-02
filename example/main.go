@@ -15,7 +15,7 @@ import (
 // Here to illustrate the simplest way to use visago
 // in your projects.
 //
-// Exmaple: go run main.go <imageUrls...>
+// Example: go run main.go <imageUrls...>
 
 func main() {
 	pluginConfig := &visagoapi.PluginConfig{
