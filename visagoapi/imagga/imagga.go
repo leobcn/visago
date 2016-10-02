@@ -9,11 +9,11 @@ import (
 	"os"
 
 	"github.com/nats-io/nuid"
-	"github.com/zquestz/visago/plugins"
+	"github.com/zquestz/visago/visagoapi"
 )
 
 func init() {
-	plugins.AddPlugin("imagga", &Plugin{})
+	visagoapi.AddPlugin("imagga", &Plugin{})
 }
 
 // Plugin implements the Plugin interface and stores
@@ -27,7 +27,7 @@ type Plugin struct {
 
 // Perform gathers metadata from imagga, for the first pass
 // it only supports urls.
-func (p *Plugin) Perform(c *plugins.PluginConfig) (string, plugins.PluginResult, error) {
+func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginResult, error) {
 	if p.configured == false {
 		return "", nil, fmt.Errorf("not configured")
 	}

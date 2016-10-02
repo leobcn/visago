@@ -1,4 +1,4 @@
-package plugins
+package visagoapi
 
 // Result is the struct passed back to the user.
 type Result struct {

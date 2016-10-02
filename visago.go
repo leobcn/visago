@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	_ "github.com/zquestz/visago/plugins/clarifai"
-	_ "github.com/zquestz/visago/plugins/googlevision"
-	_ "github.com/zquestz/visago/plugins/imagga"
+	_ "github.com/zquestz/visago/visagoapi/clarifai"
+	_ "github.com/zquestz/visago/visagoapi/googlevision"
+	_ "github.com/zquestz/visago/visagoapi/imagga"
 
 	"github.com/zquestz/visago/cmd"
 )

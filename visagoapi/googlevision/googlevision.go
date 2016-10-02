@@ -9,11 +9,11 @@ import (
 	"github.com/kaneshin/pigeon"
 	"github.com/kaneshin/pigeon/credentials"
 	"github.com/nats-io/nuid"
-	"github.com/zquestz/visago/plugins"
+	"github.com/zquestz/visago/visagoapi"
 )
 
 func init() {
-	plugins.AddPlugin("googlevision", &Plugin{})
+	visagoapi.AddPlugin("googlevision", &Plugin{})
 }
 
 // Plugin implements the Plugin interface and stores
@@ -27,7 +27,7 @@ type Plugin struct {
 
 // Perform gathers metadata from the Google Vision API. Currently
 // we only support URLs but files will be added.
-func (p *Plugin) Perform(c *plugins.PluginConfig) (string, plugins.PluginResult, error) {
+func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginResult, error) {
 	if p.configured == false {
 		return "", nil, fmt.Errorf("not configured")
 	}

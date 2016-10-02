@@ -7,10 +7,11 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/zquestz/visago/util"
+	"github.com/zquestz/visago/visagoapi"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/spf13/cobra"
-	"github.com/zquestz/visago/plugins"
-	"github.com/zquestz/visago/util"
 )
 
 const (
@@ -66,11 +67,11 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	plugins.SetBlacklist(config.Blacklist)
-	plugins.SetWhitelist(config.Whitelist)
+	visagoapi.SetBlacklist(config.Blacklist)
+	visagoapi.SetWhitelist(config.Whitelist)
 
 	if config.ListPlugins {
-		fmt.Printf(plugins.DisplayPlugins())
+		fmt.Printf(visagoapi.DisplayPlugins())
 		return nil
 	}
 
@@ -106,13 +107,13 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 			return nil
 		}
 
-		pluginConfig := &plugins.PluginConfig{
+		pluginConfig := &visagoapi.PluginConfig{
 			URLs:    urls,
 			Files:   files,
 			Verbose: config.Verbose,
 		}
 
-		output, err := plugins.RunPlugins(pluginConfig, config.JSONOutput)
+		output, err := visagoapi.RunPlugins(pluginConfig, config.JSONOutput)
 		if err != nil {
 			return err
 		}
