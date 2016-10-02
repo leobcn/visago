@@ -40,9 +40,9 @@ func (p *Plugin) Perform(c *plugins.PluginConfig) (string, plugins.PluginResult,
 		return "", nil, err
 	}
 
-	nuid := nuid.Next()
+	requestID := nuid.Next()
 
-	p.responses[nuid], err = client.Tag(clarifai.TagRequest{
+	p.responses[requestID], err = client.Tag(clarifai.TagRequest{
 		URLs: c.URLs,
 	})
 
@@ -50,7 +50,7 @@ func (p *Plugin) Perform(c *plugins.PluginConfig) (string, plugins.PluginResult,
 		return "", nil, err
 	}
 
-	return nuid, p, nil
+	return requestID, p, nil
 }
 
 // Tags returns the tags on an entry
