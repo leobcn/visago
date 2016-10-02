@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -96,11 +97,12 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 
 		urls, files, errs := sortItems(itemList)
 		for _, err := range errs {
-			fmt.Printf("[Warn] Failed to sort input: %v\n", err)
+			smartPrint("warn", fmt.Sprintf("Failed to sort input: %v\n", err))
 		}
 
 		if len(urls) == 0 && len(files) == 0 {
-			return fmt.Errorf("failed to find any valid files or URLs")
+			smartPrint("error", fmt.Sprintf("failed to find any valid files or URLs"))
+			return nil
 		}
 
 		pluginConfig := &plugins.PluginConfig{
@@ -121,4 +123,25 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 	help(cmd, args)
 
 	return nil
+}
+
+func smartPrint(severity, m string) {
+	if config.JSONOutput {
+		if severity == "" {
+			fmt.Printf(m)
+			return
+		}
+
+		outMap := make(map[string]string)
+		outMap[severity] = m
+
+		b, _ := json.Marshal(outMap)
+		fmt.Printf(fmt.Sprintf("%s\n", b))
+
+		return
+	}
+
+	fmt.Printf("[%s] %s", strings.ToUpper(severity), m)
+
+	return
 }

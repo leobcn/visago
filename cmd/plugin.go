@@ -14,7 +14,7 @@ import (
 func runPlugins(pluginConfig *plugins.PluginConfig) error {
 	wg := &sync.WaitGroup{}
 
-	outputChan := make(chan string)
+	outputChan := make(chan []string)
 	defer close(outputChan)
 
 	finishedChan := make(chan bool)
@@ -35,14 +35,14 @@ func runPlugins(pluginConfig *plugins.PluginConfig) error {
 	return nil
 }
 
-func processPluginOutput(wg *sync.WaitGroup, outputChan <-chan string, finishedChan <-chan bool) {
+func processPluginOutput(wg *sync.WaitGroup, outputChan <-chan []string, finishedChan <-chan bool) {
 	wg.Done()
 
 Loop:
 	for {
 		select {
 		case output := <-outputChan:
-			fmt.Printf(output)
+			smartPrint(output[0], output[1])
 		case <-finishedChan:
 			break Loop
 		}
@@ -50,28 +50,28 @@ Loop:
 	return
 }
 
-func runPlugin(name string, pluginConfig *plugins.PluginConfig, wg *sync.WaitGroup, outputChan chan<- string) {
+func runPlugin(name string, pluginConfig *plugins.PluginConfig, wg *sync.WaitGroup, outputChan chan<- []string) {
 	defer wg.Done()
 
 	err := plugins.Plugins[name].Setup()
 	if err != nil {
-		outputChan <- fmt.Sprintf("[Warn] Failed to setup %q plugin: %s\n", name, err)
+		outputChan <- []string{"warn", fmt.Sprintf("Failed to setup %q plugin: %s\n", name, err)}
 		return
 	}
 
 	requestID, pluginResponse, err := plugins.Plugins[name].Perform(pluginConfig)
 	if err != nil {
-		outputChan <- fmt.Sprintf("[Warn] Failed running perform on %q plugin: %s\n", name, err)
+		outputChan <- []string{"warn", fmt.Sprintf("Failed running perform on %q plugin: %s\n", name, err)}
 		return
 	}
 
 	tagMap, err := pluginResponse.Tags(requestID)
 	if err != nil {
-		outputChan <- fmt.Sprintf("[Warn] Failed to fetch tags from plugin %q: %s\n", name, err)
+		outputChan <- []string{"warn", fmt.Sprintf("Failed to fetch tags from plugin %q: %s\n", name, err)}
 		return
 	}
 
-	outputChan <- displayTags(name, tagMap)
+	outputChan <- []string{"", displayTags(name, tagMap)}
 
 	return
 }
