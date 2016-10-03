@@ -14,8 +14,8 @@ type Asset struct {
 
 // AssetTag reprsents the details for that tag
 type AssetTag struct {
-	Name       string
-	Confidence float64
+	Name       string  `json:"name,omitempty"`
+	Confidence float64 `json:"confidence,omitempty"`
 }
 
 func mergeAssets(assets []*Asset) []*Asset {
