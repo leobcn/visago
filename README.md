@@ -39,6 +39,12 @@ fmt.Printf(output)
 
 There is also an example integration in `/example/main.go`.
 
+## Plugins
+
+* Clarifai - [https://www.clarifai.com/](https://www.clarifai.com/)
+* Google Vision - [https://cloud.google.com/vision/](https://cloud.google.com/vision/)
+* Imagga - [https://imagga.com/](https://imagga.com/)
+
 ## Configuration
 
 To setup your own default configuration just create `~/.visago/config`. The configuration file is in UCL format. JSON is also fully supported as UCL can parse JSON files.
