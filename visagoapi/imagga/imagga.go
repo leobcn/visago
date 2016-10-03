@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/nats-io/nuid"
 	"github.com/zquestz/visago/visagoapi"
@@ -22,7 +23,7 @@ type Plugin struct {
 	configured bool
 	apiKey     string
 	apiSecret  string
-	responses  map[string][]*response
+	responses  map[string]*response
 }
 
 // Perform gathers metadata from imagga, for the first pass
@@ -37,37 +38,36 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 		return "", nil, fmt.Errorf("must supply urls")
 	}
 
-	responses := []*response{}
-
 	client := &http.Client{}
 
+	urlParams := []string{}
 	for _, uri := range c.URLs {
-		req, _ := http.NewRequest("GET", "https://api.imagga.com/v1/tagging?url="+url.QueryEscape(uri), nil)
-		req.SetBasicAuth(p.apiKey, p.apiSecret)
+		urlParams = append(urlParams, "url="+url.QueryEscape(uri))
+	}
 
-		resp, err := client.Do(req)
-		if err != nil {
-			return "", nil, err
-		}
-		defer resp.Body.Close()
+	req, _ := http.NewRequest("GET", "https://api.imagga.com/v1/tagging?"+strings.Join(urlParams, "&"), nil)
+	req.SetBasicAuth(p.apiKey, p.apiSecret)
 
-		respBody, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return "", nil, err
-		}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", nil, err
+	}
+	defer resp.Body.Close()
 
-		uResp := response{}
-		err = json.Unmarshal(respBody, &uResp)
-		if err != nil {
-			return "", nil, err
-		}
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", nil, err
+	}
 
-		responses = append(responses, &uResp)
+	uResp := response{}
+	err = json.Unmarshal(respBody, &uResp)
+	if err != nil {
+		return "", nil, err
 	}
 
 	responseID := nuid.Next()
 
-	p.responses[responseID] = responses
+	p.responses[responseID] = &uResp
 
 	return responseID, p, nil
 }
@@ -80,18 +80,16 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 
 	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
 
-	for _, response := range p.responses[requestID] {
-		for _, result := range response.Results {
-			tags[result.Image] = make(map[string]*visagoapi.PluginTagResult)
+	for _, result := range p.responses[requestID].Results {
+		tags[result.Image] = make(map[string]*visagoapi.PluginTagResult)
 
-			for _, t := range result.Tags {
-				tag := &visagoapi.PluginTagResult{
-					Name:       t.Tag,
-					Confidence: t.Confidence,
-				}
-
-				tags[result.Image][t.Tag] = tag
+		for _, t := range result.Tags {
+			tag := &visagoapi.PluginTagResult{
+				Name:       t.Tag,
+				Confidence: t.Confidence,
 			}
+
+			tags[result.Image][t.Tag] = tag
 		}
 	}
 
@@ -100,7 +98,7 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 
 // Reset clears the cache of existing responses.
 func (p *Plugin) Reset() {
-	p.responses = make(map[string][]*response)
+	p.responses = make(map[string]*response)
 }
 
 // RequestIDs returns a list of all cached response
@@ -129,7 +127,7 @@ func (p *Plugin) Setup() error {
 		return fmt.Errorf("credentials not found")
 	}
 
-	p.responses = make(map[string][]*response)
+	p.responses = make(map[string]*response)
 
 	p.apiKey = id
 	p.apiSecret = secret
