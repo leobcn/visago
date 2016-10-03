@@ -1,7 +1,5 @@
 package visagoapi
 
-import "github.com/zquestz/visago/util"
-
 // Result is the struct passed back to the user.
 type Result struct {
 	Assets []*Asset `json:"assets,omitempty"`
@@ -10,8 +8,14 @@ type Result struct {
 
 // Asset represents each item fetched.
 type Asset struct {
-	Name string   `json:"name,omitempty"`
-	Tags []string `json:"tags,omitempty"`
+	Name string                 `json:"name,omitempty"`
+	Tags map[string][]*AssetTag `json:"tags,omitempty"`
+}
+
+// AssetTag reprsents the details for that tag
+type AssetTag struct {
+	Name       string
+	Confidence float64
 }
 
 func mergeAssets(assets []*Asset) []*Asset {
@@ -31,12 +35,13 @@ func mergeAssets(assets []*Asset) []*Asset {
 			Name: k,
 		}
 
-		for _, a := range v {
-			mergedAsset.Tags = append(mergedAsset.Tags, a.Tags...)
-		}
+		mergedAsset.Tags = make(map[string][]*AssetTag)
 
-		// TODO: This really needs to be based on confidence score.
-		mergedAsset.Tags = util.RemoveDuplicatesUnordered(mergedAsset.Tags)
+		for _, a := range v {
+			for tk, _ := range a.Tags {
+				mergedAsset.Tags[tk] = append(mergedAsset.Tags[tk], a.Tags[tk]...)
+			}
+		}
 
 		mergedAssets = append(mergedAssets, &mergedAsset)
 	}

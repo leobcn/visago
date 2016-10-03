@@ -28,7 +28,13 @@ type Plugin interface {
 // a string containing the requestID returned from
 // Perform().
 type PluginResult interface {
-	Tags(string) (map[string][]string, error)
+	Tags(string) (map[string]map[string]*PluginTagResult, error)
+}
+
+// PluginTagResult are the attributes on a tag.
+type PluginTagResult struct {
+	Name       string
+	Confidence float64
 }
 
 // PluginConfig is used to pass configuration

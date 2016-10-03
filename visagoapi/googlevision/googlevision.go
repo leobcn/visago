@@ -68,21 +68,24 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 }
 
 // Tags returns the tags on an entry
-func (p *Plugin) Tags(requestID string) (tags map[string][]string, err error) {
-	tags = make(map[string][]string)
-
+func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.PluginTagResult, err error) {
 	if p.responses[requestID] == nil {
 		return tags, fmt.Errorf("request has not been made to google")
 	}
 
+	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
+
 	for i, response := range p.responses[requestID].Responses {
-		retTags := []string{}
+		tags[p.urls[requestID][i]] = make(map[string]*visagoapi.PluginTagResult)
 
 		for _, annotation := range response.LabelAnnotations {
-			retTags = append(retTags, annotation.Description)
-		}
+			tag := &visagoapi.PluginTagResult{
+				Name:       annotation.Description,
+				Confidence: annotation.Confidence,
+			}
 
-		tags[p.urls[requestID][i]] = retTags
+			tags[p.urls[requestID][i]][annotation.Description] = tag
+		}
 	}
 
 	return

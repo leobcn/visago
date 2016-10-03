@@ -54,15 +54,24 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 }
 
 // Tags returns the tags on an entry
-func (p *Plugin) Tags(requestID string) (tags map[string][]string, err error) {
-	tags = make(map[string][]string)
+func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.PluginTagResult, err error) {
+	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
 
 	if p.responses[requestID] == nil {
 		return tags, fmt.Errorf("request has not been made to clarifai")
 	}
 
 	for _, result := range p.responses[requestID].Results {
-		tags[result.URL] = result.Result.Tag.Classes
+		tags[result.URL] = make(map[string]*visagoapi.PluginTagResult)
+
+		for i, t := range result.Result.Tag.Classes {
+			tag := &visagoapi.PluginTagResult{
+				Name:       t,
+				Confidence: float64(result.Result.Tag.Probs[i]),
+			}
+
+			tags[result.URL][t] = tag
+		}
 	}
 
 	return

@@ -13,9 +13,9 @@ const (
 )
 
 type runner struct {
-	Name   string
-	TagMap map[string][]string
-	Errors []error
+	Name    string
+	TagData map[string]map[string]*PluginTagResult
+	Errors  []error
 }
 
 // RunPlugins runs all the plugins with the provided pluginConfig.
@@ -96,10 +96,21 @@ func buildOutput(runners []*runner) map[string]*Result {
 			}
 		}
 
-		for k, v := range r.TagMap {
+		for k, v := range r.TagData {
+			tagMap := make(map[string][]*AssetTag)
+
+			for _, tagInfo := range v {
+				atm := AssetTag{
+					Name:       tagInfo.Name,
+					Confidence: tagInfo.Confidence,
+				}
+
+				tagMap[tagInfo.Name] = append(tagMap[tagInfo.Name], &atm)
+			}
+
 			asset := Asset{
 				Name: k,
-				Tags: v,
+				Tags: tagMap,
 			}
 
 			output[r.Name].Assets = append(output[r.Name].Assets, &asset)
@@ -115,11 +126,11 @@ func buildOutput(runners []*runner) map[string]*Result {
 }
 
 func displayOutput(output map[string]*Result, jsonOutput bool) string {
-	var outputBuf bytes.Buffer
-
 	if len(output) == 0 {
 		return ""
 	}
+
+	var outputBuf bytes.Buffer
 
 	if jsonOutput {
 		b, err := json.MarshalIndent(output, "", "  ")
@@ -133,7 +144,13 @@ func displayOutput(output map[string]*Result, jsonOutput bool) string {
 
 			for _, asset := range v.Assets {
 				outputBuf.WriteString(fmt.Sprintf("- %s\n", asset.Name))
-				outputBuf.WriteString(fmt.Sprintf("%v\n", asset.Tags))
+
+				tagKeys := []string{}
+				for k, _ := range asset.Tags {
+					tagKeys = append(tagKeys, k)
+				}
+
+				outputBuf.WriteString(fmt.Sprintf("%v\n", tagKeys))
 			}
 
 			for _, err := range output[k].Errors {
@@ -162,13 +179,13 @@ func (r *runner) run(name string, pluginConfig *PluginConfig, wg *sync.WaitGroup
 		return
 	}
 
-	tagMap, err := pluginResponse.Tags(requestID)
+	tagData, err := pluginResponse.Tags(requestID)
 	if err != nil {
 		r.Errors = append(r.Errors, err)
 		return
 	}
 
-	r.TagMap = tagMap
+	r.TagData = tagData
 
 	return
 }
