@@ -38,7 +38,7 @@ func mergeAssets(assets []*Asset) []*Asset {
 		mergedAsset.Tags = make(map[string][]*AssetTag)
 
 		for _, a := range v {
-			for tk, _ := range a.Tags {
+			for tk := range a.Tags {
 				mergedAsset.Tags[tk] = append(mergedAsset.Tags[tk], a.Tags[tk]...)
 			}
 		}

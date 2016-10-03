@@ -146,7 +146,7 @@ func displayOutput(output map[string]*Result, jsonOutput bool) string {
 				outputBuf.WriteString(fmt.Sprintf("- %s\n", asset.Name))
 
 				tagKeys := []string{}
-				for k, _ := range asset.Tags {
+				for k := range asset.Tags {
 					tagKeys = append(tagKeys, k)
 				}
 
