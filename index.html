@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Visago by zquestz</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Visago</h1>
+        <p>Visual AI Aggregator</p>
+
+        <p class="view"><a href="https://github.com/zquestz/visago">View the Project on GitHub <small>zquestz/visago</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/zquestz/visago/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/zquestz/visago/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/zquestz/visago">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p><a href="http://opensource.org/licenses/MIT"><img src="https://img.shields.io/npm/l/express.svg" alt="License"></a> <a href="http://goreportcard.com/report/zquestz/visago"><img src="https://goreportcard.com/badge/github.com/zquestz/visago" alt="ReportCard"></a> <a href="http://travis-ci.org/zquestz/visago"><img src="https://travis-ci.org/zquestz/visago.svg?branch=master" alt="Build"></a> <a href="https://gitter.im/zquestz/visago?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img src="https://badges.gitter.im/zquestz/visago.svg" alt="Chat"></a></p>
+
+<h1>
+<a id="visago" class="anchor" href="#visago" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>visago</h1>
+
+<pre><code>Usage:
+  visago &lt;files&gt; [flags]
+
+Flags:
+  -h, --help           help for visago
+  -l, --list-plugins   list supported plugins
+  -v, --verbose        verbose mode
+      --version        display version
+
+</code></pre>
+
+<h2>
+<a id="install" class="anchor" href="#install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Install</h2>
+
+<pre><code>go get -v github.com/zquestz/visago
+cd $GOPATH/src/github.com/zquestz/visago
+make
+make install
+</code></pre>
+
+<h2>
+<a id="integration" class="anchor" href="#integration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Integration</h2>
+
+<p>The <code>visagoapi</code> package is available for developers who want to integrate visual AI results in their software.</p>
+
+<pre><code>pluginConfig := &amp;visagoapi.PluginConfig{
+    URLs: []string{"http://example.com/image.png"},
+}
+
+output, _ := visagoapi.RunPlugins(pluginConfig, true)
+
+fmt.Printf(output)
+</code></pre>
+
+<p>There is also an example integration in <code>/example/main.go</code>.</p>
+
+<h2>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuration</h2>
+
+<p>To setup your own default configuration just create <code>~/.visago/config</code>. The configuration file is in UCL format. JSON is also fully supported as UCL can parse JSON files.</p>
+
+<p>For more information about UCL visit:
+<a href="https://github.com/vstakhov/libucl">https://github.com/vstakhov/libucl</a></p>
+
+<p>The following keys are supported:</p>
+
+<ul>
+<li>blacklist (array of plugins to exclude)</li>
+<li>verbose (verbose mode)</li>
+<li>whitelist (array of plugins to include)</li>
+</ul>
+
+<h2>
+<a id="contributors" class="anchor" href="#contributors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Contributors</h2>
+
+<ul>
+<li><a href="https://github.com/zquestz/">Josh Ellithorpe (zquestz)</a></li>
+</ul>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
+
+<p>visago is released under the MIT license.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/zquestz">zquestz</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
