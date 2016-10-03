@@ -27,3 +27,8 @@ _testmain.go
 *.prof
 
 pkg/*
+
+# Vendored deps
+vendor/**
+!vendor/manifest
+
