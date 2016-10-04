@@ -22,7 +22,7 @@ type Plugin struct {
 	configured bool
 	creds      string
 	responses  map[string]*vision.BatchAnnotateImagesResponse
-	urls       map[string][]string
+	items      map[string][]string
 }
 
 // Perform gathers metadata from the Google Vision API. Currently
@@ -51,14 +51,18 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 		pigeon.NewFeature(pigeon.LabelDetection),
 	}
 
-	batch, err := client.NewBatchAnnotateImageRequest(c.URLs, features...)
+	items := []string{}
+	items = append(items, c.URLs...)
+	items = append(items, c.Files...)
+
+	batch, err := client.NewBatchAnnotateImageRequest(items, features...)
 	if err != nil {
 		return "", nil, err
 	}
 
 	requestID := nuid.Next()
 
-	p.urls[requestID] = c.URLs
+	p.items[requestID] = items
 	p.responses[requestID], err = client.ImagesService().Annotate(batch).Do()
 	if err != nil {
 		return "", nil, err
@@ -76,7 +80,7 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
 
 	for i, response := range p.responses[requestID].Responses {
-		tags[p.urls[requestID][i]] = make(map[string]*visagoapi.PluginTagResult)
+		tags[p.items[requestID][i]] = make(map[string]*visagoapi.PluginTagResult)
 
 		for _, annotation := range response.LabelAnnotations {
 			tag := &visagoapi.PluginTagResult{
@@ -84,7 +88,7 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 				Confidence: annotation.Confidence,
 			}
 
-			tags[p.urls[requestID][i]][annotation.Description] = tag
+			tags[p.items[requestID][i]][annotation.Description] = tag
 		}
 	}
 
@@ -94,7 +98,7 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 // Reset clears the cache of existing responses.
 func (p *Plugin) Reset() {
 	p.responses = make(map[string]*vision.BatchAnnotateImagesResponse)
-	p.urls = make(map[string][]string)
+	p.items = make(map[string][]string)
 }
 
 // RequestIDs returns a list of all cached response
@@ -123,7 +127,7 @@ func (p *Plugin) Setup() error {
 	}
 
 	p.responses = make(map[string]*vision.BatchAnnotateImagesResponse)
-	p.urls = make(map[string][]string)
+	p.items = make(map[string][]string)
 
 	p.creds = creds
 	p.configured = true
