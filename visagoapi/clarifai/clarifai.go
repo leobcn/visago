@@ -23,9 +23,7 @@ type Plugin struct {
 	files      map[string][]string
 }
 
-// Perform gathers metadata from Clarifai, for the first pass
-// it only supports urls. When PR's in the clarifai repo add
-// file support, it will be added here.
+// Perform gathers metadata from Clarifai.
 func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginResult, error) {
 	if p.configured == false {
 		return "", nil, fmt.Errorf("not configured")
