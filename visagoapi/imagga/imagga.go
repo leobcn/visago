@@ -45,32 +45,12 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 
 	responseID := nuid.Next()
 
-	var b bytes.Buffer
-	w := multipart.NewWriter(&b)
-
-	for idx, uFile := range c.Files {
-		fw, err := w.CreateFormFile(fmt.Sprintf("%d", idx), uFile)
-		if err != nil {
-			return "", nil, err
-		}
-
-		f, err := os.Open(uFile)
-		if err != nil {
-			return "", nil, err
-		}
-		defer f.Close()
-
-		_, err = io.Copy(fw, f)
-		if err != nil {
-			return "", nil, err
-		}
+	b, contentType, err := prepareUploadRequest(c)
+	if err != nil {
+		return "", nil, err
 	}
 
-	contentType := w.FormDataContentType()
-
-	w.Close()
-
-	fileReq, _ := http.NewRequest("POST", "https://api.imagga.com/v1/content", &b)
+	fileReq, _ := http.NewRequest("POST", "https://api.imagga.com/v1/content", b)
 	fileReq.SetBasicAuth(p.apiKey, p.apiSecret)
 	fileReq.Header.Set("Content-Type", contentType)
 
@@ -197,4 +177,32 @@ func (p *Plugin) Setup() error {
 	p.configured = true
 
 	return nil
+}
+
+func prepareUploadRequest(c *visagoapi.PluginConfig) (*bytes.Buffer, string, error) {
+	var b bytes.Buffer
+	w := multipart.NewWriter(&b)
+	defer w.Close()
+
+	for idx, uFile := range c.Files {
+		fw, err := w.CreateFormFile(fmt.Sprintf("%d", idx), uFile)
+		if err != nil {
+			return nil, "", err
+		}
+
+		f, err := os.Open(uFile)
+		if err != nil {
+			return nil, "", err
+		}
+		defer f.Close()
+
+		_, err = io.Copy(fw, f)
+		if err != nil {
+			return nil, "", err
+		}
+	}
+
+	contentType := w.FormDataContentType()
+
+	return &b, contentType, nil
 }
