@@ -30,6 +30,7 @@ The `visagoapi` package is available for developers who want to integrate visual
 ```
 pluginConfig := &visagoapi.PluginConfig{
 	URLs: []string{"http://example.com/image.png"},
+	Files: []string{"filename"},
 }
 
 output, _ := visagoapi.RunPlugins(pluginConfig, true)
