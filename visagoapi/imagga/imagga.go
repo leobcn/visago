@@ -185,7 +185,7 @@ func prepareUploadRequest(c *visagoapi.PluginConfig) (*bytes.Buffer, string, err
 	defer w.Close()
 
 	for idx, uFile := range c.Files {
-		fw, err := w.CreateFormFile(fmt.Sprintf("%d", idx), uFile)
+		fw, err := w.CreateFormFile(fmt.Sprintf("image[%d]", idx), uFile)
 		if err != nil {
 			return nil, "", err
 		}
