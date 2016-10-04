@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Clarifai/clarifai-go"
 	"github.com/nats-io/nuid"
+	"github.com/zquestz/clarifai-go"
 	"github.com/zquestz/visago/visagoapi"
 )
 
@@ -19,7 +19,8 @@ type Plugin struct {
 	configured bool
 	clientID   string
 	secret     string
-	responses  map[string]*clarifai.TagResp
+	responses  map[string][]*clarifai.TagResp
+	files      map[string][]string
 }
 
 // Perform gathers metadata from Clarifai, for the first pass
@@ -30,8 +31,8 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 		return "", nil, fmt.Errorf("not configured")
 	}
 
-	if len(c.URLs) == 0 {
-		return "", nil, fmt.Errorf("must supply urls")
+	if len(c.URLs) == 0 && len(c.Files) == 0 {
+		return "", nil, fmt.Errorf("must supply files or urls")
 	}
 
 	client := clarifai.NewClient(p.clientID, p.secret)
@@ -40,14 +41,31 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 		return "", nil, err
 	}
 
+	// Process urls.
 	requestID := nuid.Next()
 
-	p.responses[requestID], err = client.Tag(clarifai.TagRequest{
-		URLs: c.URLs,
-	})
+	if len(c.URLs) > 0 {
+		urlResp, err := client.Tag(clarifai.TagRequest{
+			URLs: c.URLs,
+		})
+		if err != nil {
+			return "", nil, err
+		}
 
-	if err != nil {
-		return "", nil, err
+		p.responses[requestID] = append(p.responses[requestID], urlResp)
+	}
+
+	if len(c.Files) > 0 {
+		p.files[requestID] = c.Files
+
+		filesResp, err := client.Tag(clarifai.TagRequest{
+			Files: c.Files,
+		})
+		if err != nil {
+			return "", nil, err
+		}
+
+		p.responses[requestID] = append(p.responses[requestID], filesResp)
 	}
 
 	return requestID, p, nil
@@ -61,16 +79,26 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 		return tags, fmt.Errorf("request has not been made to clarifai")
 	}
 
-	for _, result := range p.responses[requestID].Results {
-		tags[result.URL] = make(map[string]*visagoapi.PluginTagResult)
+	for _, req := range p.responses[requestID] {
+		for i, result := range req.Results {
+			var k string
 
-		for i, t := range result.Result.Tag.Classes {
-			tag := &visagoapi.PluginTagResult{
-				Name:       t,
-				Confidence: float64(result.Result.Tag.Probs[i]),
+			if result.URL != "" {
+				k = result.URL
+			} else {
+				k = p.files[requestID][i]
 			}
 
-			tags[result.URL][t] = tag
+			tags[k] = make(map[string]*visagoapi.PluginTagResult)
+
+			for i, t := range result.Result.Tag.Classes {
+				tag := &visagoapi.PluginTagResult{
+					Name:       t,
+					Confidence: float64(result.Result.Tag.Probs[i]),
+				}
+
+				tags[k][t] = tag
+			}
 		}
 	}
 
@@ -79,7 +107,8 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 
 // Reset clears the cache of existing responses.
 func (p *Plugin) Reset() {
-	p.responses = make(map[string]*clarifai.TagResp)
+	p.responses = make(map[string][]*clarifai.TagResp)
+	p.files = make(map[string][]string)
 }
 
 // RequestIDs returns a list of all cached response
@@ -108,7 +137,8 @@ func (p *Plugin) Setup() error {
 		return fmt.Errorf("credentials not found")
 	}
 
-	p.responses = make(map[string]*clarifai.TagResp)
+	p.responses = make(map[string][]*clarifai.TagResp)
+	p.files = make(map[string][]string)
 
 	p.clientID = id
 	p.secret = secret
