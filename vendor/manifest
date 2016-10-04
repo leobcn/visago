@@ -200,14 +200,6 @@
 			"notests": true
 		},
 		{
-			"importpath": "github.com/Clarifai/clarifai-go",
-			"repository": "https://github.com/Clarifai/clarifai-go",
-			"vcs": "git",
-			"revision": "aff322d5ddc1720bdc18b1e3189a7911294e24c5",
-			"branch": "master",
-			"notests": true
-		},
-		{
 			"importpath": "github.com/armon/consul-api",
 			"repository": "https://github.com/armon/consul-api",
 			"vcs": "git",
@@ -528,6 +520,14 @@
 			"revision": "749e360c8f236773f28fc6d3ddfce4a470795227",
 			"branch": "master",
 			"path": "encoding/secconf",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/zquestz/clarifai-go",
+			"repository": "https://github.com/zquestz/clarifai-go",
+			"vcs": "git",
+			"revision": "310aa2379c5816bffdd5683e2be65c3329c9f96a",
+			"branch": "master",
 			"notests": true
 		},
 		{
