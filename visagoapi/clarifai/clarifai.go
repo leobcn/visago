@@ -41,9 +41,10 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 		return "", nil, err
 	}
 
-	// Process urls.
 	requestID := nuid.Next()
 
+	// Unfortunately the Clarifai API doesn't support URLs and Files
+	// in a single request.
 	if len(c.URLs) > 0 {
 		urlResp, err := client.Tag(clarifai.TagRequest{
 			URLs: c.URLs,
