@@ -27,7 +27,7 @@ type Plugin struct {
 	apiKey     string
 	apiSecret  string
 	responses  map[string]*response
-	items      map[string][]string
+	contentIDs map[string]map[string]string
 }
 
 // Perform gathers metadata from imagga.
@@ -37,7 +37,7 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 	}
 
 	if len(c.URLs) == 0 && len(c.Files) == 0 {
-		return "", nil, fmt.Errorf("must supply files/urls")
+		return "", nil, fmt.Errorf("must supply files/URLs")
 	}
 
 	client := &http.Client{}
@@ -45,19 +45,11 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 
 	responseID := nuid.Next()
 
-	if len(c.Files) > 0 {
-		p.items[responseID] = append(p.items[responseID], c.Files...)
-	}
-
-	if len(c.URLs) > 0 {
-		p.items[responseID] = append(p.items[responseID], c.URLs...)
-	}
-
 	var b bytes.Buffer
 	w := multipart.NewWriter(&b)
 
 	for idx, uFile := range c.Files {
-		fw, err := w.CreateFormFile(fmt.Sprintf("image[%d]", idx), uFile)
+		fw, err := w.CreateFormFile(fmt.Sprintf("%d", idx), uFile)
 		if err != nil {
 			return "", nil, err
 		}
@@ -99,8 +91,11 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 		return "", nil, err
 	}
 
+	p.contentIDs[responseID] = make(map[string]string)
+
 	for _, uploaded := range fResp.Uploaded {
 		urlParams = append(urlParams, "content="+url.QueryEscape(uploaded.ID))
+		p.contentIDs[responseID][uploaded.ID] = uploaded.Filename
 	}
 
 	for _, uri := range c.URLs {
@@ -140,8 +135,12 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 
 	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
 
-	for i, result := range p.responses[requestID].Results {
-		k := p.items[requestID][i]
+	for _, result := range p.responses[requestID].Results {
+		k := result.Image
+
+		if p.contentIDs[requestID][result.Image] != "" {
+			k = p.contentIDs[requestID][result.Image]
+		}
 
 		tags[k] = make(map[string]*visagoapi.PluginTagResult)
 
@@ -161,7 +160,7 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 // Reset clears the cache of existing responses.
 func (p *Plugin) Reset() {
 	p.responses = make(map[string]*response)
-	p.items = make(map[string][]string)
+	p.contentIDs = make(map[string]map[string]string)
 }
 
 // RequestIDs returns a list of all cached response
@@ -191,7 +190,7 @@ func (p *Plugin) Setup() error {
 	}
 
 	p.responses = make(map[string]*response)
-	p.items = make(map[string][]string)
+	p.contentIDs = make(map[string]map[string]string)
 
 	p.apiKey = id
 	p.apiSecret = secret

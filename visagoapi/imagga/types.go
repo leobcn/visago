@@ -15,11 +15,11 @@ type resultEntryTag struct {
 }
 
 type resultFile struct {
-	Status		string 					`json:"status"`
-	Uploaded 	[]*resultUpload `json:"uploaded"`
+	Status   string          `json:"status"`
+	Uploaded []*resultUpload `json:"uploaded"`
 }
 
 type resultUpload struct {
-	ID 				string `json:"id"`
-	Filename 	string `json:"filename"`
+	ID       string `json:"id"`
+	Filename string `json:"filename"`
 }
