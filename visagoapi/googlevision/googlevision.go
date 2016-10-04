@@ -31,8 +31,8 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 		return "", nil, fmt.Errorf("not configured")
 	}
 
-	if len(c.URLs) == 0 {
-		return "", nil, fmt.Errorf("must supply URLs")
+	if len(c.URLs) == 0 && len(c.Files) == 0 {
+		return "", nil, fmt.Errorf("must supply files/URLs")
 	}
 
 	// Reads from ENV var GOOGLE_APPLICATION_CREDENTIALS when blank.

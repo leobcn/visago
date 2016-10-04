@@ -30,7 +30,7 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 	}
 
 	if len(c.URLs) == 0 && len(c.Files) == 0 {
-		return "", nil, fmt.Errorf("must supply files or urls")
+		return "", nil, fmt.Errorf("must supply files/URLs")
 	}
 
 	client := clarifai.NewClient(p.clientID, p.secret)
