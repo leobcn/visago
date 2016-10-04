@@ -1,9 +1,12 @@
 package imagga
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
@@ -24,23 +27,82 @@ type Plugin struct {
 	apiKey     string
 	apiSecret  string
 	responses  map[string]*response
+	items      map[string][]string
 }
 
-// Perform gathers metadata from imagga, for the first pass
-// it only supports urls.
-// TODO: Implement file handling.
+// Perform gathers metadata from imagga.
 func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginResult, error) {
 	if p.configured == false {
 		return "", nil, fmt.Errorf("not configured")
 	}
 
-	if len(c.URLs) == 0 {
-		return "", nil, fmt.Errorf("must supply urls")
+	if len(c.URLs) == 0 && len(c.Files) == 0 {
+		return "", nil, fmt.Errorf("must supply files/urls")
 	}
 
 	client := &http.Client{}
-
 	urlParams := []string{}
+
+	responseID := nuid.Next()
+
+	if len(c.Files) > 0 {
+		p.items[responseID] = append(p.items[responseID], c.Files...)
+	}
+
+	if len(c.URLs) > 0 {
+		p.items[responseID] = append(p.items[responseID], c.URLs...)
+	}
+
+	var b bytes.Buffer
+	w := multipart.NewWriter(&b)
+
+	for idx, uFile := range c.Files {
+		fw, err := w.CreateFormFile(fmt.Sprintf("image[%d]", idx), uFile)
+		if err != nil {
+			return "", nil, err
+		}
+
+		f, err := os.Open(uFile)
+		if err != nil {
+			return "", nil, err
+		}
+		defer f.Close()
+
+		_, err = io.Copy(fw, f)
+		if err != nil {
+			return "", nil, err
+		}
+	}
+
+	contentType := w.FormDataContentType()
+
+	w.Close()
+
+	fileReq, _ := http.NewRequest("POST", "https://api.imagga.com/v1/content", &b)
+	fileReq.SetBasicAuth(p.apiKey, p.apiSecret)
+	fileReq.Header.Set("Content-Type", contentType)
+
+	fileResp, err := client.Do(fileReq)
+	if err != nil {
+		return "", nil, err
+	}
+	defer fileResp.Body.Close()
+
+	fileBody, err := ioutil.ReadAll(fileResp.Body)
+	if err != nil {
+		return "", nil, err
+	}
+
+	fResp := resultFile{}
+	err = json.Unmarshal(fileBody, &fResp)
+	if err != nil {
+		return "", nil, err
+	}
+
+	for _, uploaded := range fResp.Uploaded {
+		urlParams = append(urlParams, "content="+url.QueryEscape(uploaded.ID))
+	}
+
 	for _, uri := range c.URLs {
 		urlParams = append(urlParams, "url="+url.QueryEscape(uri))
 	}
@@ -65,8 +127,6 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 		return "", nil, err
 	}
 
-	responseID := nuid.Next()
-
 	p.responses[responseID] = &uResp
 
 	return responseID, p, nil
@@ -80,8 +140,10 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 
 	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
 
-	for _, result := range p.responses[requestID].Results {
-		tags[result.Image] = make(map[string]*visagoapi.PluginTagResult)
+	for i, result := range p.responses[requestID].Results {
+		k := p.items[requestID][i]
+
+		tags[k] = make(map[string]*visagoapi.PluginTagResult)
 
 		for _, t := range result.Tags {
 			tag := &visagoapi.PluginTagResult{
@@ -89,7 +151,7 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 				Confidence: t.Confidence,
 			}
 
-			tags[result.Image][t.Tag] = tag
+			tags[k][t.Tag] = tag
 		}
 	}
 
@@ -99,6 +161,7 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 // Reset clears the cache of existing responses.
 func (p *Plugin) Reset() {
 	p.responses = make(map[string]*response)
+	p.items = make(map[string][]string)
 }
 
 // RequestIDs returns a list of all cached response
@@ -128,6 +191,7 @@ func (p *Plugin) Setup() error {
 	}
 
 	p.responses = make(map[string]*response)
+	p.items = make(map[string][]string)
 
 	p.apiKey = id
 	p.apiSecret = secret
