@@ -181,7 +181,7 @@ func (r *runner) run(name string, pluginConfig *PluginConfig, wg *sync.WaitGroup
 		return
 	}
 
-	tagData, err := pluginResponse.Tags(requestID)
+	tagData, err := pluginResponse.Tags(requestID, pluginConfig.TagScore)
 	if err != nil {
 		r.Errors = append(r.Errors, err)
 		return

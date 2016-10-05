@@ -17,6 +17,7 @@ type Config struct {
 	Verbose        bool     `json:"verbose,string"`
 	Whitelist      []string `json:"whitelist"`
 	JSONOutput     bool     `json:"json_output,string"`
+	TagScore       float64  `json:"tag_score,string"`
 }
 
 // Load reads the configuration from ~/.visago/config and loads it into the Config struct.

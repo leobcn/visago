@@ -58,6 +58,8 @@ func prepareFlags() {
 		&config.ListPlugins, "list-plugins", "l", false, "list supported plugins")
 	FilesCmd.PersistentFlags().BoolVarP(
 		&config.JSONOutput, "json", "j", false, "provide JSON output")
+	FilesCmd.PersistentFlags().Float64VarP(
+		&config.TagScore, "tag-score", "t", 0, "minimum tag score")
 }
 
 // Where all the work happens.
@@ -108,9 +110,10 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 		}
 
 		pluginConfig := &visagoapi.PluginConfig{
-			URLs:    urls,
-			Files:   files,
-			Verbose: config.Verbose,
+			URLs:     urls,
+			Files:    files,
+			Verbose:  config.Verbose,
+			TagScore: config.TagScore,
 		}
 
 		output, err := visagoapi.RunPlugins(pluginConfig, config.JSONOutput)

@@ -108,7 +108,7 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 }
 
 // Tags returns the tagging information for the request
-func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.PluginTagResult, err error) {
+func (p *Plugin) Tags(requestID string, score float64) (tags map[string]map[string]*visagoapi.PluginTagResult, err error) {
 	if p.responses[requestID] == nil {
 		return tags, fmt.Errorf("request has not been made to imagga")
 	}
@@ -125,12 +125,16 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 		tags[k] = make(map[string]*visagoapi.PluginTagResult)
 
 		for _, t := range result.Tags {
-			tag := &visagoapi.PluginTagResult{
-				Name:  t.Tag,
-				Score: (t.Confidence / 100),
-			}
+			confidence := t.Confidence / 100
 
-			tags[k][t.Tag] = tag
+			if confidence > score {
+				tag := &visagoapi.PluginTagResult{
+					Name:  t.Tag,
+					Score: confidence,
+				}
+
+				tags[k][t.Tag] = tag
+			}
 		}
 	}
 

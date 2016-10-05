@@ -71,7 +71,7 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 }
 
 // Tags returns the tags on an entry
-func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.PluginTagResult, err error) {
+func (p *Plugin) Tags(requestID string, score float64) (tags map[string]map[string]*visagoapi.PluginTagResult, err error) {
 	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
 
 	if p.responses[requestID] == nil {
@@ -91,12 +91,16 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 			tags[k] = make(map[string]*visagoapi.PluginTagResult)
 
 			for i, t := range result.Result.Tag.Classes {
-				tag := &visagoapi.PluginTagResult{
-					Name:  t,
-					Score: float64(result.Result.Tag.Probs[i]),
-				}
+				confidence := float64(result.Result.Tag.Probs[i])
 
-				tags[k][t] = tag
+				if confidence > score {
+					tag := &visagoapi.PluginTagResult{
+						Name:  t,
+						Score: confidence,
+					}
+
+					tags[k][t] = tag
+				}
 			}
 		}
 	}

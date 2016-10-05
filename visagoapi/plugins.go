@@ -26,9 +26,10 @@ type Plugin interface {
 // PluginResult is an interface on returned objects
 // from the API. All result methods will require
 // a string containing the requestID returned from
-// Perform().
+// Perform() and a minimum confidence score. Passing
+// in 0 gets you all tags.
 type PluginResult interface {
-	Tags(string) (map[string]map[string]*PluginTagResult, error)
+	Tags(string, float64) (map[string]map[string]*PluginTagResult, error)
 }
 
 // PluginTagResult are the attributes on a tag. The score
@@ -41,9 +42,10 @@ type PluginTagResult struct {
 // PluginConfig is used to pass configuration
 // data to plugins when they load.
 type PluginConfig struct {
-	URLs    []string `json:"-"`
-	Files   []string `json:"-"`
-	Verbose bool     `json:"-"`
+	URLs     []string `json:"-"`
+	Files    []string `json:"-"`
+	Verbose  bool     `json:"-"`
+	TagScore float64  `json:"-"`
 }
 
 // Plugins tracks loaded plugins.
