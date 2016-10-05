@@ -36,7 +36,7 @@ pluginConfig := &visagoapi.PluginConfig{
 
 output, _ := visagoapi.RunPlugins(pluginConfig, true)
 
-fmt.Printf(output)
+fmt.Printf("%#v\n", output)
 ```
 
 There is also an example integration in `/example/main.go`.
