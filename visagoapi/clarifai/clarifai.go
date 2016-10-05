@@ -92,8 +92,8 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 
 			for i, t := range result.Result.Tag.Classes {
 				tag := &visagoapi.PluginTagResult{
-					Name:       t,
-					Confidence: float64(result.Result.Tag.Probs[i]),
+					Name:  t,
+					Score: float64(result.Result.Tag.Probs[i]),
 				}
 
 				tags[k][t] = tag

@@ -12,10 +12,11 @@ type Asset struct {
 	Tags map[string][]*AssetTag `json:"tags,omitempty"`
 }
 
-// AssetTag reprsents the details for that tag
+// AssetTag reprsents the details for that tag.
+// The score is a value from 0 to 1.
 type AssetTag struct {
-	Name       string  `json:"name,omitempty"`
-	Confidence float64 `json:"confidence,omitempty"`
+	Name  string  `json:"name,omitempty"`
+	Score float64 `json:"score,omitempty"`
 }
 
 func mergeAssets(assets []*Asset) []*Asset {

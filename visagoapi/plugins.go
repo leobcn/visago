@@ -31,10 +31,11 @@ type PluginResult interface {
 	Tags(string) (map[string]map[string]*PluginTagResult, error)
 }
 
-// PluginTagResult are the attributes on a tag.
+// PluginTagResult are the attributes on a tag. The score
+// is a value from 0 and 1.
 type PluginTagResult struct {
-	Name       string
-	Confidence float64
+	Name  string
+	Score float64
 }
 
 // PluginConfig is used to pass configuration

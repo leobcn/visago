@@ -101,8 +101,8 @@ func buildOutput(runners []*runner) map[string]*Result {
 
 			for _, tagInfo := range v {
 				atm := AssetTag{
-					Name:       tagInfo.Name,
-					Confidence: tagInfo.Confidence,
+					Name:  tagInfo.Name,
+					Score: tagInfo.Score,
 				}
 
 				tagMap[tagInfo.Name] = append(tagMap[tagInfo.Name], &atm)

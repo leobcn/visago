@@ -82,8 +82,8 @@ func (p *Plugin) Tags(requestID string) (tags map[string]map[string]*visagoapi.P
 
 		for _, annotation := range response.LabelAnnotations {
 			tag := &visagoapi.PluginTagResult{
-				Name:       annotation.Description,
-				Confidence: annotation.Confidence,
+				Name:  annotation.Description,
+				Score: annotation.Score,
 			}
 
 			tags[p.items[requestID][i]][annotation.Description] = tag
