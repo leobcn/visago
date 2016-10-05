@@ -57,6 +57,7 @@ For more information about UCL visit:
 The following keys are supported:
 
 * blacklist (array of plugins to exclude)
+* json_output (output JSON)
 * tag_score (minimum tag score)
 * verbose (verbose mode)
 * whitelist (array of plugins to include)
