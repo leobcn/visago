@@ -36,21 +36,21 @@ type PluginResult interface {
 // PluginTagResult are the attributes on a tag. The score
 // is a value from 0 and 1.
 type PluginTagResult struct {
-	Name  string
-	Score float64
+	Name  string  `json:"name,omitempty"`
+	Score float64 `json:"score,omitempty"`
 }
 
 // PluginFaceResult are the attributes on a face match.
 type PluginFaceResult struct {
-	BoundingPoly           *BoundingPoly
-	DetectionScore         float64
-	JoyLikelihood          string
-	SorrowLikelihood       string
-	AngerLikelihood        string
-	SurpriseLikelihood     string
-	UnderExposedLikelihood string
-	BlurredLikelihood      string
-	HeadwearLikelihood     string
+	BoundingPoly           *BoundingPoly `json:"bounding_poly,omitempty"`
+	DetectionScore         float64       `json:"detection_score,omitempty"`
+	JoyLikelihood          string        `json:"joy_likelihood,omitempty"`
+	SorrowLikelihood       string        `json:"sorrow_likelihood,omitempty"`
+	AngerLikelihood        string        `json:"anger_likelihood,omitempty"`
+	SurpriseLikelihood     string        `json:"surprise_likelihood,omitempty"`
+	UnderExposedLikelihood string        `json:"under_exposed_likelihood,omitempty"`
+	BlurredLikelihood      string        `json:"blurred_likelihood,omitempty"`
+	HeadwearLikelihood     string        `json:"headwear_likelihood,omitempty"`
 }
 
 // BoundingPoly is used to store the
