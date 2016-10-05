@@ -42,10 +42,10 @@ type PluginTagResult struct {
 // PluginConfig is used to pass configuration
 // data to plugins when they load.
 type PluginConfig struct {
-	URLs     []string `json:"-"`
-	Files    []string `json:"-"`
-	Verbose  bool     `json:"-"`
-	TagScore float64  `json:"-"`
+	URLs     []string `json:"urls"`
+	Files    []string `json:"files"`
+	Verbose  bool     `json:"verbose"`
+	TagScore float64  `json:"tag_score"`
 }
 
 // Plugins tracks loaded plugins.
