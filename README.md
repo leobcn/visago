@@ -1,6 +1,6 @@
 [![License][License-Image]][License-URL] [![ReportCard][ReportCard-Image]][ReportCard-URL] [![Build][Build-Status-Image]][Build-Status-URL] [![Chat][Chat-Image]][Chat-URL]
 # visago
-Visual AI Aggregator
+Visual AI Aggregator.
 
 ```
 Usage:
@@ -22,6 +22,14 @@ go get -v github.com/zquestz/visago
 cd $GOPATH/src/github.com/zquestz/visago
 make
 make install
+```
+
+If you have issues building visago, you can vendor the dependencies by using [gvt](https://github.com/FiloSottile/gvt):
+
+```
+go get -u github.com/FiloSottile/gvt
+cd $GOPATH/src/github.com/zquestz/visago
+gvt restore
 ```
 
 ## Integration
