@@ -4,14 +4,15 @@ Visual AI Aggregator
 
 ```
 Usage:
-  visago <files> [flags]
+  visago <files/urls> [flags]
 
 Flags:
-  -h, --help           help for visago
-  -l, --list-plugins   list supported plugins
-  -v, --verbose        verbose mode
-      --version        display version
-
+  -h, --help              help for visago
+  -j, --json              provide JSON output
+  -l, --list-plugins      list supported plugins
+  -t, --tag-score float   minimum tag score
+  -v, --verbose           verbose mode
+      --version           display version
 ```
 
 ## Install
