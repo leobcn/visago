@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"sync"
 )
 
@@ -147,6 +148,7 @@ func displayOutput(output map[string]*Result, jsonOutput bool) string {
 					tagKeys = append(tagKeys, k)
 				}
 
+				sort.Strings(tagKeys)
 				outputBuf.WriteString(fmt.Sprintf("Tags: %v\n", tagKeys))
 
 				if len(asset.Faces) > 0 {
