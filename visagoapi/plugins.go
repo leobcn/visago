@@ -53,18 +53,6 @@ type PluginFaceResult struct {
 	HeadwearLikelihood     string        `json:"headwear_likelihood,omitempty"`
 }
 
-// BoundingPoly is used to store the
-// vertexes marking the postition of the face.
-type BoundingPoly struct {
-	Vertices []*Vertex `json:"vertices,omitempty"`
-}
-
-// Vertex is the x and y coordinates of a vertex
-type Vertex struct {
-	X int64 `json:"x"`
-	Y int64 `json:"y"`
-}
-
 // PluginConfig is used to pass configuration
 // data to plugins when they load.
 type PluginConfig struct {
