@@ -34,14 +34,15 @@
 <a id="visago" class="anchor" href="#visago" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>visago</h1>
 
 <pre><code>Usage:
-  visago &lt;files&gt; [flags]
+  visago &lt;files/urls&gt; [flags]
 
 Flags:
-  -h, --help           help for visago
-  -l, --list-plugins   list supported plugins
-  -v, --verbose        verbose mode
-      --version        display version
-
+  -h, --help              help for visago
+  -j, --json              provide JSON output
+  -l, --list-plugins      list supported plugins
+  -t, --tag-score float   minimum tag score
+  -v, --verbose           verbose mode
+      --version           display version
 </code></pre>
 
 <h2>
@@ -60,6 +61,7 @@ make install
 
 <pre><code>pluginConfig := &amp;visagoapi.PluginConfig{
     URLs: []string{"http://example.com/image.png"},
+    Files: []string{"filename"},
 }
 
 output, _ := visagoapi.RunPlugins(pluginConfig, true)
@@ -68,6 +70,18 @@ fmt.Printf(output)
 </code></pre>
 
 <p>There is also an example integration in <code>/example/main.go</code>.</p>
+
+<h2>
+<a id="plugins" class="anchor" href="#plugins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugins</h2>
+
+<ul>
+<li>Clarifai - <a href="https://www.clarifai.com/">https://www.clarifai.com/</a>
+</li>
+<li>Google Vision - <a href="https://cloud.google.com/vision/">https://cloud.google.com/vision/</a>
+</li>
+<li>Imagga - <a href="https://imagga.com/">https://imagga.com/</a>
+</li>
+</ul>
 
 <h2>
 <a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuration</h2>
