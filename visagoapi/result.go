@@ -8,11 +8,12 @@ type Result struct {
 
 // Asset represents each item fetched.
 type Asset struct {
-	Name string                 `json:"name,omitempty"`
-	Tags map[string][]*AssetTag `json:"tags,omitempty"`
+	Name  string                        `json:"name,omitempty"`
+	Tags  map[string][]*PluginTagResult `json:"tags,omitempty"`
+	Faces []*PluginFaceResult           `json:"faces,omitempty"`
 }
 
-// AssetTag reprsents the details for that tag.
+// AssetTag represents the details for that tag.
 // The score is a value from 0 to 1.
 type AssetTag struct {
 	Name  string  `json:"name,omitempty"`
@@ -36,12 +37,15 @@ func mergeAssets(assets []*Asset) []*Asset {
 			Name: k,
 		}
 
-		mergedAsset.Tags = make(map[string][]*AssetTag)
+		mergedAsset.Tags = make(map[string][]*PluginTagResult)
+		mergedAsset.Faces = []*PluginFaceResult{}
 
 		for _, a := range v {
 			for tk := range a.Tags {
 				mergedAsset.Tags[tk] = append(mergedAsset.Tags[tk], a.Tags[tk]...)
 			}
+
+			mergedAsset.Faces = append(mergedAsset.Faces, a.Faces...)
 		}
 
 		mergedAssets = append(mergedAssets, &mergedAsset)

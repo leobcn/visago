@@ -108,6 +108,13 @@ func (p *Plugin) Tags(requestID string, score float64) (tags map[string]map[stri
 	return
 }
 
+// Faces returns the faces on an entry
+func (p *Plugin) Faces(requestID string) (faces map[string][]*visagoapi.PluginFaceResult, err error) {
+	faces = make(map[string][]*visagoapi.PluginFaceResult)
+
+	return
+}
+
 // Reset clears the cache of existing responses.
 func (p *Plugin) Reset() {
 	p.responses = make(map[string][]*clarifai.TagResp)

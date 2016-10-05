@@ -47,6 +47,7 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 
 	features := []*vision.Feature{
 		pigeon.NewFeature(pigeon.LabelDetection),
+		pigeon.NewFeature(pigeon.FaceDetection),
 	}
 
 	items := []string{}
@@ -71,11 +72,11 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 
 // Tags returns the tags on an entry
 func (p *Plugin) Tags(requestID string, score float64) (tags map[string]map[string]*visagoapi.PluginTagResult, err error) {
+	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
+
 	if p.responses[requestID] == nil {
 		return tags, fmt.Errorf("request has not been made to google")
 	}
-
-	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
 
 	for i, response := range p.responses[requestID].Responses {
 		tags[p.items[requestID][i]] = make(map[string]*visagoapi.PluginTagResult)
@@ -89,6 +90,44 @@ func (p *Plugin) Tags(requestID string, score float64) (tags map[string]map[stri
 
 				tags[p.items[requestID][i]][annotation.Description] = tag
 			}
+		}
+	}
+
+	return
+}
+
+// Faces returns the faces on an entry
+func (p *Plugin) Faces(requestID string) (faces map[string][]*visagoapi.PluginFaceResult, err error) {
+	faces = make(map[string][]*visagoapi.PluginFaceResult)
+
+	if p.responses[requestID] == nil {
+		return faces, fmt.Errorf("request has not been made to google")
+	}
+
+	for i, response := range p.responses[requestID].Responses {
+		for _, faceA := range response.FaceAnnotations {
+			poly := &visagoapi.BoundingPoly{}
+			for _, v := range faceA.BoundingPoly.Vertices {
+				vertex := visagoapi.Vertex{
+					X: v.X,
+					Y: v.Y,
+				}
+				poly.Vertices = append(poly.Vertices, &vertex)
+			}
+
+			face := &visagoapi.PluginFaceResult{
+				BoundingPoly:           poly,
+				DetectionScore:         faceA.DetectionConfidence,
+				JoyLikelihood:          faceA.JoyLikelihood,
+				SorrowLikelihood:       faceA.SorrowLikelihood,
+				AngerLikelihood:        faceA.AngerLikelihood,
+				SurpriseLikelihood:     faceA.SurpriseLikelihood,
+				UnderExposedLikelihood: faceA.UnderExposedLikelihood,
+				BlurredLikelihood:      faceA.BlurredLikelihood,
+				HeadwearLikelihood:     faceA.HeadwearLikelihood,
+			}
+
+			faces[p.items[requestID][i]] = append(faces[p.items[requestID][i]], face)
 		}
 	}
 

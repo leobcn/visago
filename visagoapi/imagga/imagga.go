@@ -109,11 +109,11 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 
 // Tags returns the tagging information for the request
 func (p *Plugin) Tags(requestID string, score float64) (tags map[string]map[string]*visagoapi.PluginTagResult, err error) {
+	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
+
 	if p.responses[requestID] == nil {
 		return tags, fmt.Errorf("request has not been made to imagga")
 	}
-
-	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
 
 	for _, result := range p.responses[requestID].Results {
 		k := result.Image
@@ -137,6 +137,13 @@ func (p *Plugin) Tags(requestID string, score float64) (tags map[string]map[stri
 			}
 		}
 	}
+
+	return
+}
+
+// Faces returns the faces on an entry
+func (p *Plugin) Faces(requestID string) (faces map[string][]*visagoapi.PluginFaceResult, err error) {
+	faces = make(map[string][]*visagoapi.PluginFaceResult)
 
 	return
 }

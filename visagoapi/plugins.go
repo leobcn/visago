@@ -30,6 +30,7 @@ type Plugin interface {
 // in 0 gets you all tags.
 type PluginResult interface {
 	Tags(string, float64) (map[string]map[string]*PluginTagResult, error)
+	Faces(string) (map[string][]*PluginFaceResult, error)
 }
 
 // PluginTagResult are the attributes on a tag. The score
@@ -37,6 +38,31 @@ type PluginResult interface {
 type PluginTagResult struct {
 	Name  string
 	Score float64
+}
+
+// PluginFaceResult are the attributes on a face match.
+type PluginFaceResult struct {
+	BoundingPoly           *BoundingPoly
+	DetectionScore         float64
+	JoyLikelihood          string
+	SorrowLikelihood       string
+	AngerLikelihood        string
+	SurpriseLikelihood     string
+	UnderExposedLikelihood string
+	BlurredLikelihood      string
+	HeadwearLikelihood     string
+}
+
+// BoundingPoly is used to store the
+// vertexes marking the postition of the face.
+type BoundingPoly struct {
+	Vertices []*Vertex `json:"vertices,omitempty"`
+}
+
+// Vertex is the x and y coordinates of a vertex
+type Vertex struct {
+	X int64 `json:"x"`
+	Y int64 `json:"y"`
 }
 
 // PluginConfig is used to pass configuration
