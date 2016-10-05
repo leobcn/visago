@@ -137,10 +137,19 @@ func displayOutput(output map[string]*Result, jsonOutput bool) string {
 		}
 		outputBuf.WriteString(fmt.Sprintf("%s\n", b))
 	} else {
-		for k, v := range output {
+		outputKeys := []string{}
+		for k := range output {
+			outputKeys = append(outputKeys, k)
+		}
+
+		sort.Strings(outputKeys)
+
+		for _, k := range outputKeys {
+			result := output[k]
+
 			outputBuf.WriteString(fmt.Sprintf("%s\n", k))
 
-			for _, asset := range v.Assets {
+			for _, asset := range result.Assets {
 				outputBuf.WriteString(fmt.Sprintf("Asset: %s\n", asset.Name))
 
 				tagKeys := []string{}
