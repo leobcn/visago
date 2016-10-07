@@ -31,6 +31,7 @@ type Plugin interface {
 type PluginResult interface {
 	Tags(string, float64) (map[string]map[string]*PluginTagResult, error)
 	Faces(string) (map[string][]*PluginFaceResult, error)
+	Colors(string) (map[string][]*PluginColorResult, error)
 }
 
 // PluginTagResult are the attributes on a tag. The score
@@ -38,6 +39,17 @@ type PluginResult interface {
 type PluginTagResult struct {
 	Name  string  `json:"name,omitempty"`
 	Score float64 `json:"score,omitempty"`
+}
+
+// PluginColorResult are the attributes for a color.
+type PluginColorResult struct {
+	Hex           string  `json:"hex,omitempty"`
+	Score         float64 `json:"score,omitempty"`
+	PixelFraction float64 `json:"pixel_fraction,omitempty"`
+	Red           float64 `json:"red,omitempty"`
+	Green         float64 `json:"green,omitempty"`
+	Blue          float64 `json:"blue,omitempty"`
+	Alpha         float64 `json:"alpha,omitempty"`
 }
 
 // PluginFaceResult are the attributes on a face match.

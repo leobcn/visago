@@ -14,10 +14,11 @@ const (
 )
 
 type runner struct {
-	Name     string
-	TagData  map[string]map[string]*PluginTagResult
-	FaceData map[string][]*PluginFaceResult
-	Errors   []error
+	Name      string
+	TagData   map[string]map[string]*PluginTagResult
+	FaceData  map[string][]*PluginFaceResult
+	ColorData map[string][]*PluginColorResult
+	Errors    []error
 }
 
 // RunPlugins runs all the plugins with the provided pluginConfig.
@@ -106,9 +107,10 @@ func buildOutput(runners []*runner) map[string]*Result {
 			}
 
 			asset := Asset{
-				Name:  k,
-				Tags:  tagMap,
-				Faces: r.FaceData[k],
+				Name:   k,
+				Tags:   tagMap,
+				Faces:  r.FaceData[k],
+				Colors: r.ColorData[k],
 			}
 
 			output[r.Name].Assets = append(output[r.Name].Assets, &asset)
@@ -206,8 +208,15 @@ func (r *runner) run(name string, pluginConfig *PluginConfig, wg *sync.WaitGroup
 		return
 	}
 
+	colorData, err := pluginResponse.Colors(requestID)
+	if err != nil {
+		r.Errors = append(r.Errors, err)
+		return
+	}
+
 	r.TagData = tagData
 	r.FaceData = faceData
+	r.ColorData = colorData
 
 	return
 }

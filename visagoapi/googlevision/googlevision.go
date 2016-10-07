@@ -8,6 +8,7 @@ import (
 
 	"github.com/kaneshin/pigeon"
 	"github.com/kaneshin/pigeon/credentials"
+	"github.com/lucasb-eyer/go-colorful"
 	"github.com/nats-io/nuid"
 	"github.com/zquestz/visago/visagoapi"
 )
@@ -48,6 +49,7 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 	features := []*vision.Feature{
 		pigeon.NewFeature(pigeon.LabelDetection),
 		pigeon.NewFeature(pigeon.FaceDetection),
+		pigeon.NewFeature(pigeon.ImageProperties),
 	}
 
 	items := []string{}
@@ -128,6 +130,35 @@ func (p *Plugin) Faces(requestID string) (faces map[string][]*visagoapi.PluginFa
 			}
 
 			faces[p.items[requestID][i]] = append(faces[p.items[requestID][i]], face)
+		}
+	}
+
+	return
+}
+
+// Colors returns the colors on an entry
+func (p *Plugin) Colors(requestID string) (colors map[string][]*visagoapi.PluginColorResult, err error) {
+	colors = make(map[string][]*visagoapi.PluginColorResult)
+
+	if p.responses[requestID] == nil {
+		return colors, fmt.Errorf("request has not been made to google")
+	}
+
+	for i, response := range p.responses[requestID].Responses {
+		for _, c := range response.ImagePropertiesAnnotation.DominantColors.Colors {
+			cf := colorful.Color{c.Color.Red / 255, c.Color.Green / 255, c.Color.Blue / 255}
+
+			color := &visagoapi.PluginColorResult{
+				Hex:           cf.Hex(),
+				Red:           c.Color.Red,
+				Green:         c.Color.Green,
+				Blue:          c.Color.Blue,
+				Alpha:         c.Color.Alpha,
+				Score:         c.Score,
+				PixelFraction: c.PixelFraction,
+			}
+
+			colors[p.items[requestID][i]] = append(colors[p.items[requestID][i]], color)
 		}
 	}
 
