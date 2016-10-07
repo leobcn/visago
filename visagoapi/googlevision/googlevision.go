@@ -146,7 +146,11 @@ func (p *Plugin) Colors(requestID string) (colors map[string][]*visagoapi.Plugin
 
 	for i, response := range p.responses[requestID].Responses {
 		for _, c := range response.ImagePropertiesAnnotation.DominantColors.Colors {
-			cf := colorful.Color{c.Color.Red / 255, c.Color.Green / 255, c.Color.Blue / 255}
+			cf := colorful.Color{
+				R: c.Color.Red / 255,
+				G: c.Color.Green / 255,
+				B: c.Color.Blue / 255,
+			}
 
 			color := &visagoapi.PluginColorResult{
 				Hex:           cf.Hex(),
