@@ -143,8 +143,6 @@ func (p *Plugin) Colors(requestID string) (colors map[string][]*visagoapi.Plugin
 
 	for _, req := range p.colorResponses[requestID] {
 		for i, result := range req.Results {
-			fmt.Printf("%#v", result)
-
 			var k string
 
 			if result.URL != "" {
