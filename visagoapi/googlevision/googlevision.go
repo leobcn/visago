@@ -136,7 +136,7 @@ func (p *Plugin) Faces(requestID string) (faces map[string][]*visagoapi.PluginFa
 	return
 }
 
-// Colors returns the colors on an entry
+// Colors returns the colors on an entry.
 func (p *Plugin) Colors(requestID string) (colors map[string][]*visagoapi.PluginColorResult, err error) {
 	colors = make(map[string][]*visagoapi.PluginColorResult)
 
