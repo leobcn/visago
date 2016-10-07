@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/lucasb-eyer/go-colorful"
 	"github.com/nats-io/nuid"
 	"github.com/zquestz/clarifai-go"
 	"github.com/zquestz/visago/visagoapi"
@@ -16,11 +17,12 @@ func init() {
 // Plugin implements the Plugin interface and stores
 // configuration data needed by the clarifai library.
 type Plugin struct {
-	configured bool
-	clientID   string
-	secret     string
-	responses  map[string][]*clarifai.TagResp
-	files      map[string][]string
+	configured     bool
+	clientID       string
+	secret         string
+	tagResponses   map[string][]*clarifai.TagResp
+	colorResponses map[string][]*clarifai.ColorResp
+	files          map[string][]string
 }
 
 // Perform gathers metadata from Clarifai.
@@ -51,7 +53,15 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 			return "", nil, err
 		}
 
-		p.responses[requestID] = append(p.responses[requestID], urlResp)
+		colorResp, err := client.Color(clarifai.ColorRequest{
+			URLs: c.URLs,
+		})
+		if err != nil {
+			return "", nil, err
+		}
+
+		p.tagResponses[requestID] = append(p.tagResponses[requestID], urlResp)
+		p.colorResponses[requestID] = append(p.colorResponses[requestID], colorResp)
 	}
 
 	if len(c.Files) > 0 {
@@ -64,7 +74,15 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 			return "", nil, err
 		}
 
-		p.responses[requestID] = append(p.responses[requestID], filesResp)
+		colorResp, err := client.Color(clarifai.ColorRequest{
+			Files: c.Files,
+		})
+		if err != nil {
+			return "", nil, err
+		}
+
+		p.tagResponses[requestID] = append(p.tagResponses[requestID], filesResp)
+		p.colorResponses[requestID] = append(p.colorResponses[requestID], colorResp)
 	}
 
 	return requestID, p, nil
@@ -74,11 +92,11 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 func (p *Plugin) Tags(requestID string, score float64) (tags map[string]map[string]*visagoapi.PluginTagResult, err error) {
 	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
 
-	if p.responses[requestID] == nil {
+	if p.tagResponses[requestID] == nil {
 		return tags, fmt.Errorf("request has not been made to clarifai")
 	}
 
-	for _, req := range p.responses[requestID] {
+	for _, req := range p.tagResponses[requestID] {
 		for i, result := range req.Results {
 			var k string
 
@@ -119,12 +137,51 @@ func (p *Plugin) Faces(requestID string) (faces map[string][]*visagoapi.PluginFa
 func (p *Plugin) Colors(requestID string) (colors map[string][]*visagoapi.PluginColorResult, err error) {
 	colors = make(map[string][]*visagoapi.PluginColorResult)
 
+	if p.colorResponses[requestID] == nil {
+		return colors, fmt.Errorf("request has not been made to clarifai")
+	}
+
+	for _, req := range p.colorResponses[requestID] {
+		for i, result := range req.Results {
+			fmt.Printf("%#v", result)
+
+			var k string
+
+			if result.URL != "" {
+				k = result.URL
+			} else {
+				k = p.files[requestID][i]
+			}
+
+			colors[k] = []*visagoapi.PluginColorResult{}
+
+			for _, c := range result.Colors {
+				cf, err := colorful.Hex(c.Hex)
+				if err != nil {
+					return colors, err
+				}
+
+				color := &visagoapi.PluginColorResult{
+					Alpha:         1,
+					Blue:          float64(int(cf.B * 255)),
+					Green:         float64(int(cf.G * 255)),
+					Red:           float64(int(cf.R * 255)),
+					Hex:           c.Hex,
+					PixelFraction: c.Density,
+				}
+
+				colors[k] = append(colors[k], color)
+			}
+		}
+	}
+
 	return
 }
 
 // Reset clears the cache of existing responses.
 func (p *Plugin) Reset() {
-	p.responses = make(map[string][]*clarifai.TagResp)
+	p.tagResponses = make(map[string][]*clarifai.TagResp)
+	p.colorResponses = make(map[string][]*clarifai.ColorResp)
 	p.files = make(map[string][]string)
 }
 
@@ -136,7 +193,7 @@ func (p *Plugin) RequestIDs() ([]string, error) {
 	}
 
 	keys := []string{}
-	for k := range p.responses {
+	for k := range p.tagResponses {
 		keys = append(keys, k)
 	}
 
@@ -154,7 +211,8 @@ func (p *Plugin) Setup() error {
 		return fmt.Errorf("credentials not found")
 	}
 
-	p.responses = make(map[string][]*clarifai.TagResp)
+	p.tagResponses = make(map[string][]*clarifai.TagResp)
+	p.colorResponses = make(map[string][]*clarifai.ColorResp)
 	p.files = make(map[string][]string)
 
 	p.clientID = id
