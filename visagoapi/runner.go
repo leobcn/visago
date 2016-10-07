@@ -166,6 +166,11 @@ func displayOutput(output map[string]*Result, jsonOutput bool) string {
 					outputBuf.WriteString(fmt.Sprintf("Faces: %d\n", len(asset.Faces)))
 
 				}
+
+				if len(asset.Colors) > 0 {
+					outputBuf.WriteString(fmt.Sprintf("Colors: %d\n", len(asset.Colors)))
+
+				}
 			}
 
 			for _, err := range output[k].Errors {
