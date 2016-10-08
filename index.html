@@ -37,10 +37,12 @@
   visago &lt;files/urls&gt; [flags]
 
 Flags:
-  -h, --help              help for visago
+  -c, --colors            display colors
+  -f, --faces             display faces
   -j, --json              provide JSON output
   -l, --list-plugins      list supported plugins
-  -t, --tag-score float   minimum tag score
+  -s, --tag-score float   minimum tag score
+  -t, --tags              display tags
   -v, --verbose           verbose mode
       --version           display version
 </code></pre>
@@ -52,6 +54,13 @@ Flags:
 cd $GOPATH/src/github.com/zquestz/visago
 make
 make install
+</code></pre>
+
+<p>If you have issues building visago, you can vendor the dependencies by using <a href="https://github.com/FiloSottile/gvt">gvt</a>:</p>
+
+<pre><code>go get -u github.com/FiloSottile/gvt
+cd $GOPATH/src/github.com/zquestz/visago
+gvt restore
 </code></pre>
 
 <h2>
@@ -94,11 +103,14 @@ fmt.Printf("%#v\n", output)
 <p>The following keys are supported:</p>
 
 <ul>
-<li>blacklist (array of plugins to exclude)</li>
-<li>json_output (output JSON)</li>
-<li>tag_score (minimum tag score)</li>
-<li>verbose (verbose mode)</li>
-<li>whitelist (array of plugins to include)</li>
+<li>blacklist - []string (plugins to exclude)</li>
+<li>colors - bool (display colors)</li>
+<li>faces - bool (display faces)</li>
+<li>json_output - bool (output JSON)</li>
+<li>tag_score - float64 (minimum tag score)</li>
+<li>tags - bool (display tags)</li>
+<li>verbose - bool (verbose mode)</li>
+<li>whitelist - []string (plugins to include)</li>
 </ul>
 
 <h2>
