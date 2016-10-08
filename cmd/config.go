@@ -18,6 +18,9 @@ type Config struct {
 	Whitelist      []string `json:"whitelist"`
 	JSONOutput     bool     `json:"json_output,string"`
 	TagScore       float64  `json:"tag_score,string"`
+	Tags           bool     `json:"tags,string"`
+	Faces          bool     `json:"faces,string"`
+	Colors         bool     `json:"colors,string"`
 }
 
 // Load reads the configuration from ~/.visago/config and loads it into the Config struct.

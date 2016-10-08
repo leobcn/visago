@@ -6,11 +6,18 @@ import (
 	"strings"
 )
 
+const (
+	ColorsFeature = "colors"
+	FacesFeature  = "faces"
+	TagsFeature   = "tags"
+)
+
 var (
 	enableBlacklist = false
 	enableWhitelist = false
 	blacklist       = make(map[string]interface{})
 	whitelist       = make(map[string]interface{})
+	defaultFeatures = []string{ColorsFeature, FacesFeature, TagsFeature}
 )
 
 // Plugin interface provides a way to query
@@ -81,6 +88,25 @@ type PluginConfig struct {
 	Files    []string `json:"files"`
 	Verbose  bool     `json:"verbose"`
 	TagScore float64  `json:"tag_score"`
+	Features []string `json:"features"`
+}
+
+// EnabledFeature lets you check if a particular feature
+// is available.
+func (p *PluginConfig) EnabledFeature(f string) bool {
+	features := p.Features
+
+	if len(p.Features) == 0 {
+		features = defaultFeatures
+	}
+
+	for _, feature := range features {
+		if feature == f {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Plugins tracks loaded plugins.

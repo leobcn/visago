@@ -16,7 +16,7 @@ import (
 
 const (
 	appName = "visago"
-	version = "0.3.0"
+	version = "0.3.1"
 )
 
 // Stores configuration data.
@@ -53,13 +53,19 @@ func prepareFlags() {
 	FilesCmd.PersistentFlags().BoolVarP(
 		&config.DisplayVersion, "version", "", false, "display version")
 	FilesCmd.PersistentFlags().BoolVarP(
+		&config.Colors, "colors", "c", false, "display colors")
+	FilesCmd.PersistentFlags().BoolVarP(
+		&config.Faces, "faces", "f", false, "display faces")
+	FilesCmd.PersistentFlags().BoolVarP(
+		&config.Tags, "tags", "t", false, "display tags")
+	FilesCmd.PersistentFlags().BoolVarP(
 		&config.Verbose, "verbose", "v", config.Verbose, "verbose mode")
 	FilesCmd.PersistentFlags().BoolVarP(
 		&config.ListPlugins, "list-plugins", "l", false, "list supported plugins")
 	FilesCmd.PersistentFlags().BoolVarP(
 		&config.JSONOutput, "json", "j", false, "provide JSON output")
 	FilesCmd.PersistentFlags().Float64VarP(
-		&config.TagScore, "tag-score", "t", 0, "minimum tag score")
+		&config.TagScore, "tag-score", "s", 0, "minimum tag score")
 }
 
 // Where all the work happens.
@@ -109,11 +115,25 @@ func filesCommand(cmd *cobra.Command, args []string) error {
 			return nil
 		}
 
+		features := []string{}
+		if config.Colors {
+			features = append(features, visagoapi.ColorsFeature)
+		}
+
+		if config.Faces {
+			features = append(features, visagoapi.FacesFeature)
+		}
+
+		if config.Tags {
+			features = append(features, visagoapi.TagsFeature)
+		}
+
 		pluginConfig := &visagoapi.PluginConfig{
 			URLs:     urls,
 			Files:    files,
 			Verbose:  config.Verbose,
 			TagScore: config.TagScore,
+			Features: features,
 		}
 
 		output, err := visagoapi.RunPlugins(pluginConfig, config.JSONOutput)

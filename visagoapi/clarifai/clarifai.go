@@ -46,43 +46,54 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 	// Unfortunately the Clarifai API doesn't support URLs and Files
 	// in a single request.
 	if len(c.URLs) > 0 {
-		urlResp, err := client.Tag(clarifai.TagRequest{
-			URLs: c.URLs,
-		})
-		if err != nil {
-			return "", nil, err
+		if c.EnabledFeature(visagoapi.TagsFeature) {
+			urlResp, err := client.Tag(clarifai.TagRequest{
+				URLs: c.URLs,
+			})
+			if err != nil {
+				return "", nil, err
+			}
+
+			p.tagResponses[requestID] = append(p.tagResponses[requestID], urlResp)
+
 		}
 
-		colorResp, err := client.Color(clarifai.ColorRequest{
-			URLs: c.URLs,
-		})
-		if err != nil {
-			return "", nil, err
-		}
+		if c.EnabledFeature(visagoapi.ColorsFeature) {
+			colorResp, err := client.Color(clarifai.ColorRequest{
+				URLs: c.URLs,
+			})
+			if err != nil {
+				return "", nil, err
+			}
 
-		p.tagResponses[requestID] = append(p.tagResponses[requestID], urlResp)
-		p.colorResponses[requestID] = append(p.colorResponses[requestID], colorResp)
+			p.colorResponses[requestID] = append(p.colorResponses[requestID], colorResp)
+		}
 	}
 
 	if len(c.Files) > 0 {
 		p.files[requestID] = c.Files
 
-		filesResp, err := client.Tag(clarifai.TagRequest{
-			Files: c.Files,
-		})
-		if err != nil {
-			return "", nil, err
+		if c.EnabledFeature(visagoapi.TagsFeature) {
+			filesResp, err := client.Tag(clarifai.TagRequest{
+				Files: c.Files,
+			})
+			if err != nil {
+				return "", nil, err
+			}
+
+			p.tagResponses[requestID] = append(p.tagResponses[requestID], filesResp)
 		}
 
-		colorResp, err := client.Color(clarifai.ColorRequest{
-			Files: c.Files,
-		})
-		if err != nil {
-			return "", nil, err
-		}
+		if c.EnabledFeature(visagoapi.ColorsFeature) {
+			colorResp, err := client.Color(clarifai.ColorRequest{
+				Files: c.Files,
+			})
+			if err != nil {
+				return "", nil, err
+			}
 
-		p.tagResponses[requestID] = append(p.tagResponses[requestID], filesResp)
-		p.colorResponses[requestID] = append(p.colorResponses[requestID], colorResp)
+			p.colorResponses[requestID] = append(p.colorResponses[requestID], colorResp)
+		}
 	}
 
 	return requestID, p, nil
@@ -93,7 +104,7 @@ func (p *Plugin) Tags(requestID string, score float64) (tags map[string]map[stri
 	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
 
 	if p.tagResponses[requestID] == nil {
-		return tags, fmt.Errorf("request has not been made to clarifai")
+		return tags, fmt.Errorf("tag request has not been made to clarifai")
 	}
 
 	for _, req := range p.tagResponses[requestID] {
@@ -131,7 +142,7 @@ func (p *Plugin) Colors(requestID string) (colors map[string]map[string]*visagoa
 	colors = make(map[string]map[string]*visagoapi.PluginColorResult)
 
 	if p.colorResponses[requestID] == nil {
-		return colors, fmt.Errorf("request has not been made to clarifai")
+		return colors, fmt.Errorf("color request has not been made to clarifai")
 	}
 
 	for _, req := range p.colorResponses[requestID] {

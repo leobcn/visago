@@ -45,64 +45,66 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 
 	responseID := nuid.Next()
 
-	b, contentType, err := prepareUploadRequest(c)
-	if err != nil {
-		return "", nil, err
+	if c.EnabledFeature(visagoapi.TagsFeature) {
+		b, contentType, err := prepareUploadRequest(c)
+		if err != nil {
+			return "", nil, err
+		}
+
+		fileReq, _ := http.NewRequest("POST", "https://api.imagga.com/v1/content", b)
+		fileReq.SetBasicAuth(p.apiKey, p.apiSecret)
+		fileReq.Header.Set("Content-Type", contentType)
+
+		fileResp, err := client.Do(fileReq)
+		if err != nil {
+			return "", nil, err
+		}
+		defer fileResp.Body.Close()
+
+		fileBody, err := ioutil.ReadAll(fileResp.Body)
+		if err != nil {
+			return "", nil, err
+		}
+
+		fResp := resultFile{}
+		err = json.Unmarshal(fileBody, &fResp)
+		if err != nil {
+			return "", nil, err
+		}
+
+		p.contentIDs[responseID] = make(map[string]string)
+
+		for _, uploaded := range fResp.Uploaded {
+			urlParams = append(urlParams, "content="+url.QueryEscape(uploaded.ID))
+			p.contentIDs[responseID][uploaded.ID] = uploaded.Filename
+		}
+
+		for _, uri := range c.URLs {
+			urlParams = append(urlParams, "url="+url.QueryEscape(uri))
+		}
+
+		req, _ := http.NewRequest("GET", "https://api.imagga.com/v1/tagging?"+strings.Join(urlParams, "&"), nil)
+		req.SetBasicAuth(p.apiKey, p.apiSecret)
+
+		resp, err := client.Do(req)
+		if err != nil {
+			return "", nil, err
+		}
+		defer resp.Body.Close()
+
+		respBody, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "", nil, err
+		}
+
+		uResp := response{}
+		err = json.Unmarshal(respBody, &uResp)
+		if err != nil {
+			return "", nil, err
+		}
+
+		p.responses[responseID] = &uResp
 	}
-
-	fileReq, _ := http.NewRequest("POST", "https://api.imagga.com/v1/content", b)
-	fileReq.SetBasicAuth(p.apiKey, p.apiSecret)
-	fileReq.Header.Set("Content-Type", contentType)
-
-	fileResp, err := client.Do(fileReq)
-	if err != nil {
-		return "", nil, err
-	}
-	defer fileResp.Body.Close()
-
-	fileBody, err := ioutil.ReadAll(fileResp.Body)
-	if err != nil {
-		return "", nil, err
-	}
-
-	fResp := resultFile{}
-	err = json.Unmarshal(fileBody, &fResp)
-	if err != nil {
-		return "", nil, err
-	}
-
-	p.contentIDs[responseID] = make(map[string]string)
-
-	for _, uploaded := range fResp.Uploaded {
-		urlParams = append(urlParams, "content="+url.QueryEscape(uploaded.ID))
-		p.contentIDs[responseID][uploaded.ID] = uploaded.Filename
-	}
-
-	for _, uri := range c.URLs {
-		urlParams = append(urlParams, "url="+url.QueryEscape(uri))
-	}
-
-	req, _ := http.NewRequest("GET", "https://api.imagga.com/v1/tagging?"+strings.Join(urlParams, "&"), nil)
-	req.SetBasicAuth(p.apiKey, p.apiSecret)
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", nil, err
-	}
-	defer resp.Body.Close()
-
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", nil, err
-	}
-
-	uResp := response{}
-	err = json.Unmarshal(respBody, &uResp)
-	if err != nil {
-		return "", nil, err
-	}
-
-	p.responses[responseID] = &uResp
 
 	return responseID, p, nil
 }
@@ -112,7 +114,7 @@ func (p *Plugin) Tags(requestID string, score float64) (tags map[string]map[stri
 	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
 
 	if p.responses[requestID] == nil {
-		return tags, fmt.Errorf("request has not been made to imagga")
+		return tags, fmt.Errorf("tag request has not been made to imagga")
 	}
 
 	for _, result := range p.responses[requestID].Results {

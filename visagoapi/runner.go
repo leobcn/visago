@@ -19,6 +19,7 @@ type runner struct {
 	FaceData  map[string][]*PluginFaceResult
 	ColorData map[string]map[string]*PluginColorResult
 	Errors    []error
+	Items     []string
 }
 
 // RunPlugins runs all the plugins with the provided pluginConfig.
@@ -39,10 +40,15 @@ func RunPlugins(pluginConfig *PluginConfig, jsonOutput bool) (string, error) {
 	dwg.Add(1)
 	go processOutput(dwg, outputChan, runChan, finishedChan, jsonOutput)
 
+	runnerItems := []string{}
+	runnerItems = append(runnerItems, pluginConfig.URLs...)
+	runnerItems = append(runnerItems, pluginConfig.Files...)
+
 	for _, name := range PluginNames() {
 		wg.Add(1)
 		r := runner{
-			Name: name,
+			Name:  name,
+			Items: runnerItems,
 		}
 		go r.run(name, pluginConfig, wg, runChan)
 	}
@@ -99,22 +105,22 @@ func buildOutput(runners []*runner) map[string]*Result {
 			}
 		}
 
-		for k, m := range r.TagData {
+		for _, item := range r.Items {
 			tagMap := make(map[string][]*PluginTagResult)
 			colorMap := make(map[string][]*PluginColorResult)
 
-			for _, tagInfo := range m {
+			for _, tagInfo := range r.TagData[item] {
 				tagMap[tagInfo.Name] = append(tagMap[tagInfo.Name], tagInfo)
 			}
 
-			for _, colorInfo := range r.ColorData[k] {
+			for _, colorInfo := range r.ColorData[item] {
 				colorMap[colorInfo.Hex] = append(colorMap[colorInfo.Hex], colorInfo)
 			}
 
 			asset := Asset{
-				Name:   k,
+				Name:   item,
 				Tags:   tagMap,
-				Faces:  r.FaceData[k],
+				Faces:  r.FaceData[item],
 				Colors: colorMap,
 				Source: r.Name,
 			}
@@ -172,8 +178,13 @@ func displayOutput(output map[string]*Result, jsonOutput bool) string {
 				}
 				sort.Strings(colorKeys)
 
-				outputBuf.WriteString(fmt.Sprintf("Tags: %v\n", tagKeys))
-				outputBuf.WriteString(fmt.Sprintf("Colors: %v\n", colorKeys))
+				if len(tagKeys) > 0 {
+					outputBuf.WriteString(fmt.Sprintf("Tags: %v\n", tagKeys))
+				}
+
+				if len(colorKeys) > 0 {
+					outputBuf.WriteString(fmt.Sprintf("Colors: %v\n", colorKeys))
+				}
 
 				if len(asset.Faces) > 0 {
 					outputBuf.WriteString(fmt.Sprintf("Faces: %d\n", len(asset.Faces)))
@@ -208,27 +219,35 @@ func (r *runner) run(name string, pluginConfig *PluginConfig, wg *sync.WaitGroup
 		return
 	}
 
-	tagData, err := pluginResponse.Tags(requestID, pluginConfig.TagScore)
-	if err != nil {
-		r.Errors = append(r.Errors, err)
-		return
+	if pluginConfig.EnabledFeature(TagsFeature) {
+		tagData, err := pluginResponse.Tags(requestID, pluginConfig.TagScore)
+		if err != nil {
+			r.Errors = append(r.Errors, err)
+			return
+		}
+
+		r.TagData = tagData
 	}
 
-	faceData, err := pluginResponse.Faces(requestID)
-	if err != nil {
-		r.Errors = append(r.Errors, err)
-		return
+	if pluginConfig.EnabledFeature(ColorsFeature) {
+		colorData, err := pluginResponse.Colors(requestID)
+		if err != nil {
+			r.Errors = append(r.Errors, err)
+			return
+		}
+
+		r.ColorData = colorData
 	}
 
-	colorData, err := pluginResponse.Colors(requestID)
-	if err != nil {
-		r.Errors = append(r.Errors, err)
-		return
-	}
+	if pluginConfig.EnabledFeature(FacesFeature) {
+		faceData, err := pluginResponse.Faces(requestID)
+		if err != nil {
+			r.Errors = append(r.Errors, err)
+			return
+		}
 
-	r.TagData = tagData
-	r.FaceData = faceData
-	r.ColorData = colorData
+		r.FaceData = faceData
+	}
 
 	return
 }

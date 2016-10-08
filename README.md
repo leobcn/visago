@@ -7,10 +7,12 @@ Usage:
   visago <files/urls> [flags]
 
 Flags:
-  -h, --help              help for visago
+  -c, --colors            display colors
+  -f, --faces             display faces
   -j, --json              provide JSON output
   -l, --list-plugins      list supported plugins
-  -t, --tag-score float   minimum tag score
+  -s, --tag-score float   minimum tag score
+  -t, --tags              display tags
   -v, --verbose           verbose mode
       --version           display version
 ```
@@ -64,11 +66,14 @@ For more information about UCL visit:
 
 The following keys are supported:
 
-* blacklist (array of plugins to exclude)
-* json_output (output JSON)
-* tag_score (minimum tag score)
-* verbose (verbose mode)
-* whitelist (array of plugins to include)
+* blacklist - []string (plugins to exclude)
+* colors - bool (display colors)
+* faces - bool (display faces)
+* json_output - bool (output JSON)
+* tag_score - float64 (minimum tag score)
+* tags - bool (display tags)
+* verbose - bool (verbose mode)
+* whitelist - []string (plugins to include)
 
 ## Contributors
 

@@ -46,10 +46,18 @@ func (p *Plugin) Perform(c *visagoapi.PluginConfig) (string, visagoapi.PluginRes
 		return "", nil, err
 	}
 
-	features := []*vision.Feature{
-		pigeon.NewFeature(pigeon.LabelDetection),
-		pigeon.NewFeature(pigeon.FaceDetection),
-		pigeon.NewFeature(pigeon.ImageProperties),
+	features := []*vision.Feature{}
+
+	if c.EnabledFeature(visagoapi.TagsFeature) {
+		features = append(features, pigeon.NewFeature(pigeon.LabelDetection))
+	}
+
+	if c.EnabledFeature(visagoapi.ColorsFeature) {
+		features = append(features, pigeon.NewFeature(pigeon.ImageProperties))
+	}
+
+	if c.EnabledFeature(visagoapi.FacesFeature) {
+		features = append(features, pigeon.NewFeature(pigeon.FaceDetection))
 	}
 
 	items := []string{}
@@ -77,7 +85,7 @@ func (p *Plugin) Tags(requestID string, score float64) (tags map[string]map[stri
 	tags = make(map[string]map[string]*visagoapi.PluginTagResult)
 
 	if p.responses[requestID] == nil {
-		return tags, fmt.Errorf("request has not been made to google")
+		return tags, fmt.Errorf("tag request has not been made to google")
 	}
 
 	for i, response := range p.responses[requestID].Responses {
@@ -103,10 +111,14 @@ func (p *Plugin) Colors(requestID string) (colors map[string]map[string]*visagoa
 	colors = make(map[string]map[string]*visagoapi.PluginColorResult)
 
 	if p.responses[requestID] == nil {
-		return colors, fmt.Errorf("request has not been made to google")
+		return colors, fmt.Errorf("color request has not been made to google")
 	}
 
 	for i, response := range p.responses[requestID].Responses {
+		if response.ImagePropertiesAnnotation == nil {
+			return colors, fmt.Errorf("response from google doesn't include color data")
+		}
+
 		k := p.items[requestID][i]
 
 		colors[k] = make(map[string]*visagoapi.PluginColorResult)
@@ -140,7 +152,7 @@ func (p *Plugin) Faces(requestID string) (faces map[string][]*visagoapi.PluginFa
 	faces = make(map[string][]*visagoapi.PluginFaceResult)
 
 	if p.responses[requestID] == nil {
-		return faces, fmt.Errorf("request has not been made to google")
+		return faces, fmt.Errorf("face request has not been made to google")
 	}
 
 	for i, response := range p.responses[requestID].Responses {
