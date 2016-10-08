@@ -7,9 +7,14 @@ import (
 )
 
 const (
+	// ColorsFeature is the value to enable the color features.
 	ColorsFeature = "colors"
-	FacesFeature  = "faces"
-	TagsFeature   = "tags"
+
+	// FacesFeature is the value to enable the face detection features.
+	FacesFeature = "faces"
+
+	// TagsFeature is the value to enable the tagging features.
+	TagsFeature = "tags"
 )
 
 var (
