@@ -163,18 +163,19 @@ func displayOutput(output map[string]*Result, jsonOutput bool) string {
 				for k := range asset.Tags {
 					tagKeys = append(tagKeys, k)
 				}
-
 				sort.Strings(tagKeys)
+
+				colorKeys := []string{}
+				for k := range asset.Colors {
+					colorKeys = append(colorKeys, k)
+				}
+				sort.Strings(colorKeys)
+
 				outputBuf.WriteString(fmt.Sprintf("Tags: %v\n", tagKeys))
+				outputBuf.WriteString(fmt.Sprintf("Colors: %v\n", colorKeys))
 
 				if len(asset.Faces) > 0 {
 					outputBuf.WriteString(fmt.Sprintf("Faces: %d\n", len(asset.Faces)))
-
-				}
-
-				if len(asset.Colors) > 0 {
-					outputBuf.WriteString(fmt.Sprintf("Colors: %d\n", len(asset.Colors)))
-
 				}
 			}
 

@@ -10,8 +10,8 @@ type Result struct {
 type Asset struct {
 	Name   string                          `json:"name,omitempty"`
 	Tags   map[string][]*PluginTagResult   `json:"tags,omitempty"`
-	Faces  []*PluginFaceResult             `json:"faces,omitempty"`
 	Colors map[string][]*PluginColorResult `json:"colors,omitempty"`
+	Faces  []*PluginFaceResult             `json:"faces,omitempty"`
 }
 
 func mergeAssets(assets []*Asset) []*Asset {

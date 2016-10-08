@@ -41,6 +41,17 @@ type PluginTagResult struct {
 	Score float64 `json:"score,omitempty"`
 }
 
+// PluginColorResult are the attributes for a color.
+type PluginColorResult struct {
+	Hex           string  `json:"hex,omitempty"`
+	Score         float64 `json:"score,omitempty"`
+	PixelFraction float64 `json:"pixel_fraction,omitempty"`
+	Red           float64 `json:"red,omitempty"`
+	Green         float64 `json:"green,omitempty"`
+	Blue          float64 `json:"blue,omitempty"`
+	Alpha         float64 `json:"alpha,omitempty"`
+}
+
 // PluginFaceResult are the attributes on a face match.
 type PluginFaceResult struct {
 	BoundingPoly           *BoundingPoly `json:"bounding_poly,omitempty"`
@@ -52,17 +63,6 @@ type PluginFaceResult struct {
 	UnderExposedLikelihood string        `json:"under_exposed_likelihood,omitempty"`
 	BlurredLikelihood      string        `json:"blurred_likelihood,omitempty"`
 	HeadwearLikelihood     string        `json:"headwear_likelihood,omitempty"`
-}
-
-// PluginColorResult are the attributes for a color.
-type PluginColorResult struct {
-	Hex           string  `json:"hex,omitempty"`
-	Score         float64 `json:"score,omitempty"`
-	PixelFraction float64 `json:"pixel_fraction,omitempty"`
-	Red           float64 `json:"red,omitempty"`
-	Green         float64 `json:"green,omitempty"`
-	Blue          float64 `json:"blue,omitempty"`
-	Alpha         float64 `json:"alpha,omitempty"`
 }
 
 // PluginConfig is used to pass configuration

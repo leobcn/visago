@@ -141,16 +141,16 @@ func (p *Plugin) Tags(requestID string, score float64) (tags map[string]map[stri
 	return
 }
 
-// Faces returns the faces on an entry
-func (p *Plugin) Faces(requestID string) (faces map[string][]*visagoapi.PluginFaceResult, err error) {
-	faces = make(map[string][]*visagoapi.PluginFaceResult)
+// Colors returns the colors on an entry
+func (p *Plugin) Colors(requestID string) (colors map[string]map[string]*visagoapi.PluginColorResult, err error) {
+	colors = make(map[string]map[string]*visagoapi.PluginColorResult)
 
 	return
 }
 
-// Colors returns the colors on an entry
-func (p *Plugin) Colors(requestID string) (colors map[string]map[string]*visagoapi.PluginColorResult, err error) {
-	colors = make(map[string]map[string]*visagoapi.PluginColorResult)
+// Faces returns the faces on an entry
+func (p *Plugin) Faces(requestID string) (faces map[string][]*visagoapi.PluginFaceResult, err error) {
+	faces = make(map[string][]*visagoapi.PluginFaceResult)
 
 	return
 }

@@ -98,6 +98,43 @@ func (p *Plugin) Tags(requestID string, score float64) (tags map[string]map[stri
 	return
 }
 
+// Colors returns the colors on an entry.
+func (p *Plugin) Colors(requestID string) (colors map[string]map[string]*visagoapi.PluginColorResult, err error) {
+	colors = make(map[string]map[string]*visagoapi.PluginColorResult)
+
+	if p.responses[requestID] == nil {
+		return colors, fmt.Errorf("request has not been made to google")
+	}
+
+	for i, response := range p.responses[requestID].Responses {
+		k := p.items[requestID][i]
+
+		colors[k] = make(map[string]*visagoapi.PluginColorResult)
+
+		for _, c := range response.ImagePropertiesAnnotation.DominantColors.Colors {
+			cf := colorful.Color{
+				R: c.Color.Red / 255,
+				G: c.Color.Green / 255,
+				B: c.Color.Blue / 255,
+			}
+
+			color := &visagoapi.PluginColorResult{
+				Hex:           cf.Hex(),
+				Red:           c.Color.Red,
+				Green:         c.Color.Green,
+				Blue:          c.Color.Blue,
+				Alpha:         c.Color.Alpha,
+				Score:         c.Score,
+				PixelFraction: c.PixelFraction,
+			}
+
+			colors[k][cf.Hex()] = color
+		}
+	}
+
+	return
+}
+
 // Faces returns the faces on an entry
 func (p *Plugin) Faces(requestID string) (faces map[string][]*visagoapi.PluginFaceResult, err error) {
 	faces = make(map[string][]*visagoapi.PluginFaceResult)
@@ -130,43 +167,6 @@ func (p *Plugin) Faces(requestID string) (faces map[string][]*visagoapi.PluginFa
 			}
 
 			faces[p.items[requestID][i]] = append(faces[p.items[requestID][i]], face)
-		}
-	}
-
-	return
-}
-
-// Colors returns the colors on an entry.
-func (p *Plugin) Colors(requestID string) (colors map[string]map[string]*visagoapi.PluginColorResult, err error) {
-	colors = make(map[string]map[string]*visagoapi.PluginColorResult)
-
-	if p.responses[requestID] == nil {
-		return colors, fmt.Errorf("request has not been made to google")
-	}
-
-	for i, response := range p.responses[requestID].Responses {
-		k := p.items[requestID][i]
-
-		colors[k] = make(map[string]*visagoapi.PluginColorResult)
-
-		for _, c := range response.ImagePropertiesAnnotation.DominantColors.Colors {
-			cf := colorful.Color{
-				R: c.Color.Red / 255,
-				G: c.Color.Green / 255,
-				B: c.Color.Blue / 255,
-			}
-
-			color := &visagoapi.PluginColorResult{
-				Hex:           cf.Hex(),
-				Red:           c.Color.Red,
-				Green:         c.Color.Green,
-				Blue:          c.Color.Blue,
-				Alpha:         c.Color.Alpha,
-				Score:         c.Score,
-				PixelFraction: c.PixelFraction,
-			}
-
-			colors[k][cf.Hex()] = color
 		}
 	}
 
