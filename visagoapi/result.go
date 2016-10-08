@@ -12,6 +12,7 @@ type Asset struct {
 	Tags   map[string][]*PluginTagResult   `json:"tags,omitempty"`
 	Colors map[string][]*PluginColorResult `json:"colors,omitempty"`
 	Faces  []*PluginFaceResult             `json:"faces,omitempty"`
+	Source string                          `json:"-"`
 }
 
 func mergeAssets(assets []*Asset) []*Asset {
@@ -37,14 +38,50 @@ func mergeAssets(assets []*Asset) []*Asset {
 
 		for _, a := range v {
 			for tk := range a.Tags {
-				mergedAsset.Tags[tk] = append(mergedAsset.Tags[tk], a.Tags[tk]...)
+				for _, t := range a.Tags[tk] {
+					nt := &PluginTagResult{
+						Name:   t.Name,
+						Score:  t.Score,
+						Source: a.Source,
+					}
+
+					mergedAsset.Tags[tk] = append(mergedAsset.Tags[tk], nt)
+				}
 			}
 
 			for ck := range a.Colors {
-				mergedAsset.Colors[ck] = append(mergedAsset.Colors[ck], a.Colors[ck]...)
+				for _, c := range a.Colors[ck] {
+					nc := &PluginColorResult{
+						Source:        a.Source,
+						Score:         c.Score,
+						Alpha:         c.Alpha,
+						Hex:           c.Hex,
+						Blue:          c.Blue,
+						Green:         c.Green,
+						Red:           c.Red,
+						PixelFraction: c.PixelFraction,
+					}
+
+					mergedAsset.Colors[ck] = append(mergedAsset.Colors[ck], nc)
+				}
 			}
 
-			mergedAsset.Faces = append(mergedAsset.Faces, a.Faces...)
+			for _, f := range a.Faces {
+				nf := &PluginFaceResult{
+					Source:                 a.Source,
+					BoundingPoly:           f.BoundingPoly,
+					DetectionScore:         f.DetectionScore,
+					JoyLikelihood:          f.JoyLikelihood,
+					SorrowLikelihood:       f.SorrowLikelihood,
+					AngerLikelihood:        f.AngerLikelihood,
+					SurpriseLikelihood:     f.SurpriseLikelihood,
+					UnderExposedLikelihood: f.UnderExposedLikelihood,
+					BlurredLikelihood:      f.BlurredLikelihood,
+					HeadwearLikelihood:     f.HeadwearLikelihood,
+				}
+
+				mergedAsset.Faces = append(mergedAsset.Faces, nf)
+			}
 		}
 
 		mergedAssets = append(mergedAssets, &mergedAsset)

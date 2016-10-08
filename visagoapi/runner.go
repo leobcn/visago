@@ -116,6 +116,7 @@ func buildOutput(runners []*runner) map[string]*Result {
 				Tags:   tagMap,
 				Faces:  r.FaceData[k],
 				Colors: colorMap,
+				Source: r.Name,
 			}
 
 			output[r.Name].Assets = append(output[r.Name].Assets, &asset)

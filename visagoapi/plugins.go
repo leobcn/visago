@@ -39,6 +39,9 @@ type PluginResult interface {
 type PluginTagResult struct {
 	Name  string  `json:"name,omitempty"`
 	Score float64 `json:"score,omitempty"`
+
+	// Source should not be set directly by a plugin.
+	Source string `json:"source,omitempty"`
 }
 
 // PluginColorResult are the attributes for a color.
@@ -50,6 +53,9 @@ type PluginColorResult struct {
 	Green         float64 `json:"green,omitempty"`
 	Blue          float64 `json:"blue,omitempty"`
 	Alpha         float64 `json:"alpha,omitempty"`
+
+	// Source should not be set directly by a plugin.
+	Source string `json:"source,omitempty"`
 }
 
 // PluginFaceResult are the attributes on a face match.
@@ -63,6 +69,9 @@ type PluginFaceResult struct {
 	UnderExposedLikelihood string        `json:"under_exposed_likelihood,omitempty"`
 	BlurredLikelihood      string        `json:"blurred_likelihood,omitempty"`
 	HeadwearLikelihood     string        `json:"headwear_likelihood,omitempty"`
+
+	// Source should not be set directly by a plugin.
+	Source string `json:"source,omitempty"`
 }
 
 // PluginConfig is used to pass configuration
