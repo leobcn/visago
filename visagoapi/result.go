@@ -8,10 +8,10 @@ type Result struct {
 
 // Asset represents each item fetched.
 type Asset struct {
-	Name   string                        `json:"name,omitempty"`
-	Tags   map[string][]*PluginTagResult `json:"tags,omitempty"`
-	Faces  []*PluginFaceResult           `json:"faces,omitempty"`
-	Colors []*PluginColorResult          `json:"colors,omitempty"`
+	Name   string                          `json:"name,omitempty"`
+	Tags   map[string][]*PluginTagResult   `json:"tags,omitempty"`
+	Faces  []*PluginFaceResult             `json:"faces,omitempty"`
+	Colors map[string][]*PluginColorResult `json:"colors,omitempty"`
 }
 
 func mergeAssets(assets []*Asset) []*Asset {
@@ -33,15 +33,18 @@ func mergeAssets(assets []*Asset) []*Asset {
 
 		mergedAsset.Tags = make(map[string][]*PluginTagResult)
 		mergedAsset.Faces = []*PluginFaceResult{}
-		mergedAsset.Colors = []*PluginColorResult{}
+		mergedAsset.Colors = make(map[string][]*PluginColorResult)
 
 		for _, a := range v {
 			for tk := range a.Tags {
 				mergedAsset.Tags[tk] = append(mergedAsset.Tags[tk], a.Tags[tk]...)
 			}
 
+			for ck := range a.Colors {
+				mergedAsset.Colors[ck] = append(mergedAsset.Colors[ck], a.Colors[ck]...)
+			}
+
 			mergedAsset.Faces = append(mergedAsset.Faces, a.Faces...)
-			mergedAsset.Colors = append(mergedAsset.Colors, a.Colors...)
 		}
 
 		mergedAssets = append(mergedAssets, &mergedAsset)

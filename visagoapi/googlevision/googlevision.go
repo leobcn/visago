@@ -137,14 +137,18 @@ func (p *Plugin) Faces(requestID string) (faces map[string][]*visagoapi.PluginFa
 }
 
 // Colors returns the colors on an entry.
-func (p *Plugin) Colors(requestID string) (colors map[string][]*visagoapi.PluginColorResult, err error) {
-	colors = make(map[string][]*visagoapi.PluginColorResult)
+func (p *Plugin) Colors(requestID string) (colors map[string]map[string]*visagoapi.PluginColorResult, err error) {
+	colors = make(map[string]map[string]*visagoapi.PluginColorResult)
 
 	if p.responses[requestID] == nil {
 		return colors, fmt.Errorf("request has not been made to google")
 	}
 
 	for i, response := range p.responses[requestID].Responses {
+		k := p.items[requestID][i]
+
+		colors[k] = make(map[string]*visagoapi.PluginColorResult)
+
 		for _, c := range response.ImagePropertiesAnnotation.DominantColors.Colors {
 			cf := colorful.Color{
 				R: c.Color.Red / 255,
@@ -162,7 +166,7 @@ func (p *Plugin) Colors(requestID string) (colors map[string][]*visagoapi.Plugin
 				PixelFraction: c.PixelFraction,
 			}
 
-			colors[p.items[requestID][i]] = append(colors[p.items[requestID][i]], color)
+			colors[k][cf.Hex()] = color
 		}
 	}
 

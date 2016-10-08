@@ -17,7 +17,7 @@ type runner struct {
 	Name      string
 	TagData   map[string]map[string]*PluginTagResult
 	FaceData  map[string][]*PluginFaceResult
-	ColorData map[string][]*PluginColorResult
+	ColorData map[string]map[string]*PluginColorResult
 	Errors    []error
 }
 
@@ -101,16 +101,21 @@ func buildOutput(runners []*runner) map[string]*Result {
 
 		for k, m := range r.TagData {
 			tagMap := make(map[string][]*PluginTagResult)
+			colorMap := make(map[string][]*PluginColorResult)
 
 			for _, tagInfo := range m {
 				tagMap[tagInfo.Name] = append(tagMap[tagInfo.Name], tagInfo)
+			}
+
+			for _, colorInfo := range r.ColorData[k] {
+				colorMap[colorInfo.Hex] = append(colorMap[colorInfo.Hex], colorInfo)
 			}
 
 			asset := Asset{
 				Name:   k,
 				Tags:   tagMap,
 				Faces:  r.FaceData[k],
-				Colors: r.ColorData[k],
+				Colors: colorMap,
 			}
 
 			output[r.Name].Assets = append(output[r.Name].Assets, &asset)

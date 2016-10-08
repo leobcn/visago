@@ -134,8 +134,8 @@ func (p *Plugin) Faces(requestID string) (faces map[string][]*visagoapi.PluginFa
 }
 
 // Colors returns the colors on an entry
-func (p *Plugin) Colors(requestID string) (colors map[string][]*visagoapi.PluginColorResult, err error) {
-	colors = make(map[string][]*visagoapi.PluginColorResult)
+func (p *Plugin) Colors(requestID string) (colors map[string]map[string]*visagoapi.PluginColorResult, err error) {
+	colors = make(map[string]map[string]*visagoapi.PluginColorResult)
 
 	if p.colorResponses[requestID] == nil {
 		return colors, fmt.Errorf("request has not been made to clarifai")
@@ -151,7 +151,7 @@ func (p *Plugin) Colors(requestID string) (colors map[string][]*visagoapi.Plugin
 				k = p.files[requestID][i]
 			}
 
-			colors[k] = []*visagoapi.PluginColorResult{}
+			colors[k] = make(map[string]*visagoapi.PluginColorResult)
 
 			for _, c := range result.Colors {
 				cf, err := colorful.Hex(c.Hex)
@@ -168,7 +168,7 @@ func (p *Plugin) Colors(requestID string) (colors map[string][]*visagoapi.Plugin
 					PixelFraction: c.Density,
 				}
 
-				colors[k] = append(colors[k], color)
+				colors[k][c.Hex] = color
 			}
 		}
 	}

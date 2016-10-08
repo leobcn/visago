@@ -31,7 +31,7 @@ type Plugin interface {
 type PluginResult interface {
 	Tags(string, float64) (map[string]map[string]*PluginTagResult, error)
 	Faces(string) (map[string][]*PluginFaceResult, error)
-	Colors(string) (map[string][]*PluginColorResult, error)
+	Colors(string) (map[string]map[string]*PluginColorResult, error)
 }
 
 // PluginTagResult are the attributes on a tag. The score
