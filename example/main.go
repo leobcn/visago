@@ -20,6 +20,9 @@ import (
 func main() {
 	pluginConfig := &visagoapi.PluginConfig{
 		URLs: os.Args[1:],
+		// To only enable select features, set them below.
+		// By default all features are enabled.
+		// Features: []string{visagoapi.TagsFeature, visagoapi.ColorsFeature, visagoapi.FacesFeature},
 	}
 
 	output, err := visagoapi.RunPlugins(pluginConfig, true)

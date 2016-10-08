@@ -42,6 +42,9 @@ The `visagoapi` package is available for developers who want to integrate visual
 pluginConfig := &visagoapi.PluginConfig{
 	URLs: []string{"http://example.com/image.png"},
 	Files: []string{"filename"},
+	// To only enable select features, set them below.
+	// By default all features are enabled.
+	// Features: []string{visagoapi.TagsFeature, visagoapi.ColorsFeature, visagoapi.FacesFeature},
 }
 
 output, _ := visagoapi.RunPlugins(pluginConfig, true)
