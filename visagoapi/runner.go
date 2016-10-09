@@ -117,17 +117,20 @@ func buildOutput(runners []*runner) map[string]*Result {
 				colorMap[colorInfo.Hex] = append(colorMap[colorInfo.Hex], colorInfo)
 			}
 
-			asset := Asset{
-				Name:   item,
-				Tags:   tagMap,
-				Faces:  r.FaceData[item],
-				Colors: colorMap,
-				Source: r.Name,
+			// Only include the asset if we have data.
+			if len(tagMap) > 0 || len(colorMap) > 0 || len(r.FaceData[item]) > 0 {
+				asset := Asset{
+					Name:   item,
+					Tags:   tagMap,
+					Faces:  r.FaceData[item],
+					Colors: colorMap,
+					Source: r.Name,
+				}
+
+				output[r.Name].Assets = append(output[r.Name].Assets, &asset)
+
+				allAssets = append(allAssets, &asset)
 			}
-
-			output[r.Name].Assets = append(output[r.Name].Assets, &asset)
-
-			allAssets = append(allAssets, &asset)
 		}
 	}
 
