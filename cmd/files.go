@@ -16,7 +16,7 @@ import (
 
 const (
 	appName = "visago"
-	version = "0.3.1"
+	version = "0.3.2"
 )
 
 // Stores configuration data.
