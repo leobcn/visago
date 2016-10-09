@@ -34,6 +34,15 @@ cd $GOPATH/src/github.com/zquestz/visago
 gvt restore
 ```
 
+## Examples
+
+Get metadata about any set of URLs/Files. This requests all currently supported features.
+```
+visago landscape.jpg http://digital-photography-school.com/wp-content/uploads/flickr/2746960560_8711acfc60_o.jpg --json
+```
+
+The lengthy response is contained in this [gist](https://gist.github.com/zquestz/08712a847d0b0da1700338f6711d89c8)
+
 ## Integration
 
 The `visagoapi` package is available for developers who want to integrate visual AI results in their software.
