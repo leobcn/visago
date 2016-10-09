@@ -28,7 +28,7 @@
         </ul>
       </header>
       <section>
-        <p><a href="http://opensource.org/licenses/MIT"><img src="https://img.shields.io/npm/l/express.svg" alt="License"></a> <a href="http://goreportcard.com/report/zquestz/visago"><img src="https://goreportcard.com/badge/github.com/zquestz/visago" alt="ReportCard"></a> <a href="http://travis-ci.org/zquestz/visago"><img src="https://travis-ci.org/zquestz/visago.svg?branch=master" alt="Build"></a> <a href="https://gitter.im/zquestz/visago?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img src="https://badges.gitter.im/zquestz/visago.svg" alt="Chat"></a></p>
+        <p><a href="http://opensource.org/licenses/MIT"><img src="https://img.shields.io/npm/l/express.svg" alt="License"></a> <a href="http://goreportcard.com/report/zquestz/visago"><img src="https://goreportcard.com/badge/github.com/zquestz/visago" alt="ReportCard"></a> <a href="http://travis-ci.org/zquestz/visago"><img src="https://travis-ci.org/zquestz/visago.svg?branch=master" alt="Build"></a> <a href="https://github.com/zquestz/visago/releases/tag/v0.3.2"><img src="http://img.shields.io/badge/release-v0.3.2-1eb0fc.svg" alt="Release"></a> <a href="https://gitter.im/zquestz/visago?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img src="https://badges.gitter.im/zquestz/visago.svg" alt="Chat"></a></p>
 
 <h1>
 <a id="visago" class="anchor" href="#visago" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>visago</h1>
@@ -61,6 +61,42 @@ make install
 <pre><code>go get -u github.com/FiloSottile/gvt
 cd $GOPATH/src/github.com/zquestz/visago
 gvt restore
+</code></pre>
+
+<h2>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Examples</h2>
+
+<p>Get metadata about any set of URLs/Files. This requests all currently supported features (Tags/Colors/Faces).</p>
+
+<pre><code>visago --json \
+  landscape.jpg \
+  http://digital-photography-school.com/wp-content/uploads/flickr/2746960560_8711acfc60_o.jpg \
+  http://cdn.wegotthiscovered.com/wp-content/uploads/keanureeves.jpg
+</code></pre>
+
+<p>The lengthy response is contained in this <a href="https://gist.github.com/zquestz/08712a847d0b0da1700338f6711d89c8">gist</a>.</p>
+
+<p>To filter returned tags by tag score, use the <code>-s</code> flag. This value is between 0 and 1.</p>
+
+<pre><code>visago -s .5 landscape.jpg
+</code></pre>
+
+<p>You can also enable specific features if you do not require all supported functionality.
+That way you can be much more efficient on API calls.</p>
+
+<p>To only fetch tags pass the <code>-t</code> flag.</p>
+
+<pre><code>visago -t mountain.png
+</code></pre>
+
+<p>To only fetch facial data pass the <code>-f</code> flag.</p>
+
+<pre><code>visago -f bio.jpg
+</code></pre>
+
+<p>To only fetch color data pass the <code>-c</code> flag.</p>
+
+<pre><code>visago -c elmo.jpg
 </code></pre>
 
 <h2>
