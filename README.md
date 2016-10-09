@@ -39,9 +39,9 @@ gvt restore
 Get metadata about any set of URLs/Files. This requests all currently supported features (Tags/Colors/Faces).
 ```
 visago --json \
-landscape.jpg \
-http://digital-photography-school.com/wp-content/uploads/flickr/2746960560_8711acfc60_o.jpg \
-http://cdn.wegotthiscovered.com/wp-content/uploads/keanureeves.jpg
+  landscape.jpg \
+  http://digital-photography-school.com/wp-content/uploads/flickr/2746960560_8711acfc60_o.jpg \
+  http://cdn.wegotthiscovered.com/wp-content/uploads/keanureeves.jpg
 ```
 
 The lengthy response is contained in this [gist](https://gist.github.com/zquestz/08712a847d0b0da1700338f6711d89c8).
