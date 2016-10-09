@@ -46,6 +46,29 @@ visago --json \
 
 The lengthy response is contained in this [gist](https://gist.github.com/zquestz/08712a847d0b0da1700338f6711d89c8).
 
+To filter returned tags by tag score, use the `-s` flag. This value is between 0 and 1.
+```
+visago -s .5 landscape.jpg
+```
+
+You can also enable specific features if you do not require all supported functionality.
+That way you can be much more efficient on API calls.
+
+To only fetch tags pass the `-t` flag.
+```
+visago -t mountain.png
+```
+
+To only fetch facial data pass the `-f` flag.
+```
+visago -f bio.jpg
+```
+
+To only fetch color data pass the `-c` flag.
+```
+visago -c elmo.jpg
+```
+
 ## Integration
 
 The `visagoapi` package is available for developers who want to integrate visual AI results in their software.
